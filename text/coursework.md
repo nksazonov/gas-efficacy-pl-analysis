@@ -18,6 +18,12 @@ The main goal is to compare different programming languages for blockchain devel
 
 The research is based on the analysis of the Ethereum Virtual Machine (EVM), its code execution, programming languages for smart contract development, the features of corresponding compilers, and the gas efficiency of the resulting bytecode.
 
+TODO: if have time, add more practical application:
+
+> try to evaluate procedure of rewriting SC to a more gas-efficient language
+> OR
+> rewrite an existing smart contract with more gas-efficient programming language
+
 The results of this research paper describe features of different programming languages for blockchain development, their advantages and disadvantages, and a comparision of gas efficiency of the resulting bytecode.
 
 The research findings can be used by developers to choose the most gas-efficient programming language for blockchain development both prior to the development or for optimisation purposes.
