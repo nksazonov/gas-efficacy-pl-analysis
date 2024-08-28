@@ -30,15 +30,17 @@ The research findings can be used by developers to choose the most gas-efficient
 
 ## Table of contents
 
+TODO: update TOC accordingly to what's written below
+
 - Introduction
 - Chapter 1. Smart contract development
   - 1.1. Blockchain technology
-  - 1.2. Smart contracts
+  - 1.2. Accounts and Smart contracts
   - 1.3. Ethereum Virtual Machine
   - 1.4. Gas
-- Chapter 2. Compilation and bytecode
+- Chapter 2. Compilation and EVM bytecode
   - 2.1. Compilation process
-  - 2.2. Resulting bytecode
+  - 2.2. EVM bytecode
 - Chapter 3. Blockchain programming languages comparison
   - 3.1. List of programming languages for blockchain development
     - 3.1.1. Solidity
@@ -89,3 +91,356 @@ Microsoft Visual Studio Code was used as an integrated development environment (
 
 **Possible areas of application**
 This paper describes the process of smart contract execution on the EVM-compatible blockchains, the concepts of gas, opcodes, bytecode, and the compilation process. The results of this research can be used by developers to better understand the relation between the bytecode and gas efficiency, and to choose the most gas-efficient programming language for blockchain development.
+
+## Chapter 1. Blockchain and gas fees
+
+### 1.1. Blockchain technology
+
+#### 1.1.1. General overview
+
+#### 1.1.2. Global state
+
+#### 1.2.3. Transaction execution
+
+#### 1.2.4. Gas fees
+
+Gas fees are a crucial aspect of the Ethereum because they maintain the network’s security, efficiency, and stability. Gas serves as the metering mechanism that limits computational resources consumed by transactions and smart contracts, preventing abuse such as infinite loops or spam attacks.
+By requiring fees proportional to the computational complexity of an operation, gas ensures that users pay for the resources they consume, discouraging inefficient code and incentivizing optimization.
+Moreover, gas fees prepayment must be provided by the transaction originator to prevent denial-of-service attacks, where malicious actors could flood the network with transactions that consume excessive resources.
+Also, gas fees play a vital role in prioritizing transactions: validators are incentivized to include higher-fee transactions first, creating a dynamic market where users can bid for timely inclusion.
+This system also provides economic alignment across network participants, where fees collected are distributed to validators as rewards, ensuring the network remains decentralized and secure.
+Ultimately, gas fees regulate the use of Ethereum’s shared computational resources, making the Ethereum a sustainable and scalable environment for decentralized applications.
+
+#### 1.1.5. Blocks
+
+#### 1.1.6. Consensus algorithms and block finalization
+
+#### 1.1.7. EIPs and ERCs
+
+#### 1.1.8. Clients
+
+### 1.2. Accounts and Smart contracts
+
+#### 1.2.1. Addresses
+
+#### 1.2.2. Contract creation
+
+#### 1.2.3. Message call
+
+### 1.3. Bytecode
+
+TODO: explain the bytecode structure, how opcodes are extracted etc.
+
+### 1.4. Ethereum Virtual Machine
+
+Ethereum Virtual Machine (EVM) is a crutial component of the Ethereum blockchain, acting as a quasi-Turing-complete virtual machine that executes transactions within the Ethereum ecosystem.
+As clarified in Ethereum Yellow Paper, "quasi" stems from the fact that the total amount of computations performed is explicitly bounded by a separate parameter called gas.
+The aforementioned Ethereum Yellow Paper also rigoriously defines the behavior of the EVM, which includes the compliance with the rules of the global (persistant) and local (not persistant) state changes alongside with calculation and deduction of the gas costs of the performed operations.
+
+#### 1.4.1. EVM overview
+
+The EVM operates as a simple stack-based architecture with a word size of 256 bits, chosen specifically to support the Keccak256 hash function and elliptic-curve calculations.
+The memory model is a straightforward word-addressed byte array, while the stack has a maximum depth of 1024 items.
+The machine also includes a separate storage model, which is conceptually similar to memory but differs in that it is a word-addressable word array. Unlike volatile memory, storage is non-volatile and persists as part of the system global state.
+Initially, all locations in both storage and memory are well-initialized as zero.
+
+The EVM does not adhere to the traditional von Neumann architecture: instead of storing program code in generally accessible memory or storage, the code is kept in a separate virtual ROM, accessible only through specialized instructions.
+
+The machine can have exceptional execution halting for several reasons, including stack underflow, invalid instructions, and out-of-gas exceptions. The latter is a critical feature of the EVM, as it prevents infinite loops and other computationally intensive operations from consuming all available resources.
+During exceptional halting, all performed state changes are reverted and this fact is reported to the execution agent, which deals with it separetely.
+
+#### 1.4.2. Machine state
+
+For the EVM to operate, it must maintain a machine state, which consists of the following components:
+
+- Gas available (g) - the amount of gas remaining for the current transaction. Decreases as operations are executed and is used to pay for computation.
+- Program counter (pc) - the number of the current instruction being executed. Increments by one after each instruction. Can be modified by JUMP and JUMPI instructions.
+- Memory contents (m) - word-addressable byte array, with each byte array being 32 bytes long. Used for temporary storage during execution.
+- Active number of words in memory (i) - the number of words currently used in memory, counting from 0. Increases as memory is accessed and decreases as memory is freed.
+- Stack contents (s) - a stack of 256-bit words used for storing intermediate values during execution. Grows and shrinks as values are pushed and popped.
+- Returndata buffer (o) - a buffer used to store data returned from a message call. Cleared after each call.
+
+Apart from the machine state, the EVM also inherits execution environment (I), which includes:
+
+- I_a, the address of the account which owns the code that is executing.
+- I_o, the sender address of the transaction that originated this execution.
+- I_p, the price of gas paid by the signer of the transaction that originated this execution (effective gas price).
+- I_d, the byte array that is the input data to this execution (transaction data).
+- I_s, the address of the account which caused the code to be executing (transaction sender).
+- I_v, the value, in Wei, passed to this account as part of the same procedure as execution (transaction value).
+- I_b, the byte array that is the machine code to be executed.
+- I_H, the block header of the present block.
+- I_e, the depth of the present message-call or contract-creation (i.e. the number of CALLs or CREATE(2)s being executed at present).
+- I_w, the permission to make modifications to the state.
+
+#### 1.4.3. Opcodes
+
+In EVM, each operation has its own number, therefore the short name - "opcode" (operation code). The EVM has a total of 143 opcodes, each descibed by:
+
+- Value - the number of the opcode;
+- Mnemonic - the short descriptive name of the opcode;
+- Items popped - the number of items popped from the stack;
+- Items pushed - the number of items pushed to the stack;
+- Intrinsic gas cost - the base gas cost of the opcode. The actual gas cost can be higher due to additional factors;
+- Operation logic - a description of the operation performed by the opcode.
+
+Detailed information about each opcode can be found in Appendix TODO:.
+
+It is worth noting that some of the opcodes read data from the bytecode itself, rather than the stack. These include the PUSH1...PUSH32 opcodes, which push a constant value to the stack.
+
+All the opcodes are divided into groups based on their functionality. These groups include:
+
+- 0s - Stop and Arithmetic Operations
+- 10s - Comparison & Bitwise Logic Operations
+- 20s - KECCAK256
+- 30s - Environmental Information
+- 40s - Block Information
+- 50s - Stack, Memory, Storage and Flow Operations
+- 5f, 60s and 70s - Push Operations
+- 80s - Duplication Operations
+- 90s - Exchange Operations
+- a0s - Logging Operations
+- f0s - System operations
+
+The numeration of the opcodes is not continuous, as some numbers are reserved for future use.
+
+#### 1.4.4. Fees overview
+
+In EVM, gas fees are charged in three specific scenarios, each being a prerequisite for executing an operation. The first and most common scenario involves the intrinsic gas cost associated with the computation required for the operation (opcode) itself.
+The second scenario arises when gas is deducted as part of a payment for initiating a subordinate message call or creating a new contract, which applies to operations such as CREATE, CREATE2, CALL, and CALLCODE. Lastly, gas is also consumed when there is an increase in memory usage during execution.
+
+During the execution of a contract, the total fee related to memory usage is based on the smallest multiple of 32 bytes that covers all memory indices accessed (whether for reading or writing).
+These memory fees are assessed on a just-in-time basis. For example, accessing a memory area that extends at least 32 bytes beyond any previously accessed region will trigger an additional fee.
+
+Storage fees operate under a slightly different model. To encourage efficient storage usage — since excessive storage increases the state database size for all nodes — the gas cost for an operation that clears a storage entry does not only waived, but also gets a refund.
+In fact, this refund is effectively provided up front because the initial cost of using a storage location is significantly higher than that of ongoing usage. This design incentivizes developers to clear unused storage, helping manage the overall blockchain state size.
+
+The gas cost of an operation is calculated as the sum of the intrinsic gas cost, possible gas cost of passing arguments to instruction, as well as memory access, either cold or warm.
+Ethereum Yellow Paper divides opcodes into such groups based on their gas cost:
+
+- W_zero = {STOP, RETURN, REVERT}
+- W_base = {ADDRESS, ORIGIN, CALLER, CALLVALUE, CALLDATASIZE, CODESIZE, GASPRICE, COINBASE, TIMESTAMP, NUMBER, PREVRANDAO, GASLIMIT, CHAINID, RETURNDATASIZE, POP, PC, MSIZE, GAS, BASEFEE, PUSH0}
+- W_verylow = {ADD, SUB, NOT, LT, GT, SLT, SGT, EQ, ISZERO, AND, OR, XOR, BYTE, SHL, SHR, SAR, CALLDATALOAD, MLOAD, MSTORE, MSTORE8, PUSH1, ..., PUSH32, DUP*, SWAP*}
+- W_low = {MUL, DIV, SDIV, MOD, SMOD, SIGNEXTEND, SELFBALANCE}
+- W_mid = {ADDMOD, MULMOD, JUMP}
+- W_high = {JUMPI}
+- W_copy = {CALLDATACOPY, CODECOPY, RETURNDATACOPY}
+- W_extaccount = {BALANCE, EXTCODESIZE, EXTCODEHASH}
+- W_call = {CALL, CALLCODE, DELEGATECALL, STATICCALL}
+
+with the following gas costs:
+
+- G_zero = 0
+- G_base = 2
+- G_verylow = 3
+- G_low = 5
+- G_mid = 8
+- G_high = 10
+- G_copy = G_verylow + 3 \* rounddown(stack[2] / 32)
+- G_extaccount = 100, if an account being accessed is "warm", 2600 if "cold"
+
+More detailed information about gas costs for each opcode is presented in Appendix TODO:.
+
+#### 1.4.5. Halting
+
+As previously stated, the EVM can halt execution for various reasons, however two groups can be distinguished: exceptional halting and normal halting.
+
+Ethereum Yellow Paper specifies that the execution is in an exceptional halting state if there is insufficient gas, if the instruction (opcode) is invalid, if there are insufficient stack items for the operation,
+if the new stack size after performing an operation is larger than 1024, if a JUMP/JUMPI destination is invalid, or state modification is attempted during a static call.
+
+JUMP/JUMPI destination is valid if it is occupied by the JUMPDEST opcode. Such positions must be on valid instruction boundaries, rather then in the middle of the PUSH operations, and must appear within the explicitly defined portion of the code.
+
+The normal halting state is reached when the VM executes either opcode from the two groups: RETURN, REVERT or STOP, SELFDESTRUCT, or reaches the end of the code. In the latter case, the STOP opcode is executed.
+
+#### 1.4.6. Execution
+
+Execution model is defined recursively as a function X over the full system state, the machine state, accrued system substate and the execution environment.
+The results of X are a changed full system state, changed machine state, and the output data, and are determined conditionally:
+
+- if the system is in an exceptional halting state, a full system state is not changed, and output data is empty.
+- if a system is in a normal halting state (e.g. the current instruction is REVERT), then a full system state is not changed, an amount of gas consumed by the instruction is deducted from the current machine state, and output data is the result of the current instruction.
+- if an output of the current instruction is not empty, then the result is an application of the iterator function O (which defines the result of a single cycle of the state machine).
+- otherwise, the result is an application of the execution model function X to the result of the iterator function O.
+
+Iterator function O is defined as a function of the current full system state, machine state, accrued system substate, and execution environment, and outputs of the same meaning. The function is defined as following:
+
+- The execution environment is not changed.
+- The full system state and accrued substate are changed according to the effects of the current instruction.
+- The changes to the machine state are the following:
+  - a specific for a current instruction amount of items are popped from and pushed to the stack
+  - gas left is decreased by the gas cost of the current instruction
+  - program counter is modified according to the current instruction: either set to the JUMP/JUMPI destination, or incremented so that the next instruction is executed (PUSH1...PUSH32 require bigger increment to account for the data being pushed).
+
+Informally, the execution model function X is cycled (Yellow Paper specifies recursion, but the implementation can use a simple loop), executes instructions one by one, which results in changes to the machine and global state,
+until either the system is in an exceptional halting state, which discards all changes made, or the machine has reached a controlled halt, which preserves the changes made and returns the output data.
+
+### 1.5. Fee sources conslusion
+
+TODO: describe main sources of gas fees after reviewing how gas fees are calculated in the EVM.
+
+## Chapter 2. Programming languages and compilation
+
+### 2.1. Programming languages
+
+TODO:
+
+- Declarative / imperative
+- static / dynamic typing
+- object-oriented / functional / procedural programming
+- which language generation / abstraction level
+- memory-management tools (garbage collection)
+- type checking
+- bounds checking
+- static / dynamic scope
+- explicit access control
+
+### 2.2. Compilation process
+
+#### 2.2.1. Compiler overview
+
+A compiler is a program that reads a program written in one language (the source language) and converts it into an equivalent program in another language (the target language).
+A critical function of the compiler is to identify and report any errors found in the source program during the translation process, so that the developer can resolve the issues and retry again.
+When the target program is a machine-language executable, the user can call it to process inputs and generate outputs.
+
+Another type of language processor is an interpreter. Rather than producing a target program through translation, an interpreter executes the operations specified in the source program directly on the user-provided inputs.
+Generally, a compiler-generated machine-language target program is significantly faster at mapping inputs to outputs compared to an interpreter. However, an interpreter often provides better error diagnostics than a compiler because it executes the source program statement by statement.
+
+Creating an executable target program might require more than just a compiler. The source program could be split into modules stored in separate files, and gathering these into a single program might be the job of a separate program called a preprocessor.
+The preprocessor can also expand macros, which are shorthand notations, into source language statements.
+
+This modified source program is then sent to a compiler. The compiler's output might be an assembly-language program, as assembly language is easier to generate and debug. The assembly-language program is then processed by an assembler, producing relocatable machine code.
+
+Large programs are often compiled in segments, necessitating the linking of relocatable machine code with other relocatable object files and library files to form the executable code that runs on the machine.
+The linker resolves external memory addresses where code in one file refers to a location in another file. Finally, the loader assembles all executable object files into memory for execution.
+
+#### 2.2.2. Structure of a compiler
+
+Basically, compilation process can be divided into two main parts: analysis and synthesis.
+
+During the analysis phase, the source program is broken down into its fundamental components, and a grammatical structure is applied to these components. This structure is then used to create an intermediate representation of the source program.
+If the analysis phase finds that the source program is either syntactically incorrect or semantically flawed, it must provide informative messages to help the user make corrections.
+Additionally, the analysis phase gathers information about the source program and stores it in a data structure known as a symbol table. This symbol table, along with the intermediate representation, is then passed to the synthesis phase.
+
+In the synthesis phase, the target program is constructed using the intermediate representation and the information from the symbol table. The analysis phase is often referred to as the front end of the compiler, while the synthesis phase is known as the back end.
+Upon closer inspection of the compilation process, we see that it functions as a series of phases, each transforming the representation of the source program. A typical breakdown of these phases is shown in Fig. 2.1. In practice, several phases might be combined, and the intermediate representations between these grouped phases might not be explicitly constructed.
+The symbol table, which contains information about the entire source program, is utilized by all phases of the compiler.
+
+The analysis part is often called the front end, and the synthesis part is called the back end. An interpreter, however, does not fit into this model, as it does not produce a target program. Instead, it directly executes the operations specified in the source program on the user-provided inputs.
+
+![Compilation process phases](../images/2-1-compilation-process-phases.png)
+
+Figure 2.1. Compilation process phases
+
+##### 2.2.2.1. Symbol table
+
+A key function of a compiler is to record the variable names used in the source program and gather information about various attributes of each name.
+These attributes may include details about the allocated storage for a name, its type, its scope (where in the program its value can be used), and, in the case of procedure names, details such as the number and types of its arguments, the method of passing each argument (e.g., by value or by reference), and the return type.
+
+The symbol table is a data structure that contains a record for each variable name, with fields for the name's attributes. This data structure should be designed to enable the compiler to quickly find the record for each name and efficiently store or retrieve data from that record.
+
+##### 2.2.2.2. Lexical analysis
+
+The first phase of a compiler is known as lexical analysis or scanning. During this phase, the lexical analyzer reads the stream of characters that make up the source program and groups these characters into meaningful sequences called lexemes. For each lexeme, the lexical analyzer generates a token in the form of
+
+```txt
+<token-name; attribute-value>
+```
+
+which it then passes to the next phase, syntax analysis. In this token, the first component, token-name, is an abstract symbol used in syntax analysis, while the second component, attribute-value, refers to an entry in the symbol table for this token. The information from the symbol table entry is essential for semantic analysis and code generation.
+
+For example, a sequence of tokens after lexical analysis might look like this:
+
+```txt
+<id,1> <+=> <42> <*> <id,2>
+```
+
+In this representation, the tokens are `id` (identifier), `+=` (addition assignment operator), `42` (integer constant), `*` (multiplication operator), and `id` (identifier). The attribute values `1` and `2` refer to the symbol table entries for the identifiers.
+
+##### 2.2.2.3. Syntax analysis
+
+The second phase of a compiler is syntax analysis or parsing. During this phase, the parser takes the first components of the tokens generated by the lexical analyzer and uses them to create a tree-like intermediate representation that illustrates the grammatical structure of the token stream.
+A common form of this representation is a syntax tree, where each interior node represents an operation, and the children of the node represent the arguments of that operation.
+
+The following phases of the compiler utilize this grammatical structure to further analyze the source program and generate the target program.
+
+##### 2.2.2.4. Semantic analysis
+
+The semantic analyzer utilizes the syntax tree and the information in the symbol table to verify the source program's semantic consistency with the language definition. It also collects type information and stores it either in the syntax tree or the symbol table for later use during intermediate code generation.
+A crucial aspect of semantic analysis is type checking, where the compiler ensures that each operator has compatible operands. For instance, many programming languages require an array index to be an integer; the compiler must report an error if a floating-point number is used as an array index.
+The language specification may allow certain type conversions, known as coercions. For example, a binary arithmetic operator might be used with either a pair of integers or a pair of floating-point numbers. If the operator is applied to a floating-point number and an integer, the compiler can convert or coerce the integer to a floating-point number.
+
+##### 2.2.2.5. Intermediate code generation
+
+When translating a source program into target code, a compiler may create one or more intermediate representations, which can take various forms. Syntax trees are a common type of intermediate representation used during syntax and semantic analysis.
+
+After completing the syntax and semantic analysis of the source program, many compilers generate a specific low-level or machine-like intermediate representation, which can be considered a program for an abstract machine. This intermediate representation should be easy to produce and straightforward to translate into the target machine.
+
+One form of intermediate representation is known as three-address code, which comprises a sequence of assembly-like instructions with three operands per instruction. Each operand can function similarly to a register.
+
+There are several noteworthy points about three-address instructions. First, each three-address assignment instruction has at most one operator on the right side, thereby determining the order of operations. Second, the compiler must generate a temporary name to store the value computed by a three-address instruction. Third, some three-address instructions have fewer than three operands.
+
+Another form of intermediate representation is bytecode, which is then usually executed by an interpreter.
+For example, Java language processor generates bytecode that is executed by the Java Virtual Machine (JVM). A benefit of using bytecode is that it allows the same compiled program to run on any machine that has an interpreter for the bytecode.
+
+##### 2.2.2.6. Code optimization
+
+The machine-independent code optimization phase aims to enhance the intermediate code to produce better target code. Typically, "better" means faster, but other goals, such as shorter code or code that uses less power, may also be important. For instance, a basic algorithm might generate intermediate code by using an instruction for each operator in the tree representation produced by the semantic analyzer.
+
+Using a straightforward intermediate code generation algorithm followed by code optimization is an effective method for producing high-quality target code.
+
+The extent of code optimization varies significantly among different compilers. In those that perform the most optimization, known as "optimizing compilers," a substantial amount of time is devoted to this phase. There are simple optimizations that can greatly improve the running time of the target program without significantly slowing down the compilation process.
+
+##### 2.2.2.7. Code generation
+
+The code generator receives an intermediate representation of the source program and translates it into the target language. If the target language is machine code, it involves selecting registers or memory locations for each variable used by the program.
+The intermediate instructions are then converted into sequences of machine instructions that accomplish the same tasks. An essential part of code generation is the careful assignment of registers to store variables.
+
+---
+
+NOTES:
+
+EVM is alike Java VM, and their compilation processes are similar too. [2.1, p.2-3, Example 1.1].
+
+Chapter 6 describes principal intermediate representations used in compilers.
+
+There is a great variation in the amount of code optimization different compilers perform. In those that do the most, the so-called optimizing compilers, "a significant amount of time is spent on this phase. There are simple optimizations that signifficantly improve the running time of the target programwithout slowing down compilation too much. The chapters from 8 on discuss
+machine-independent and machine-dependent optimizations in detail. [2.1, p.10]
+
+Data-flow analysis engines that facilitate the gathering of information about how values are transmitted from one part of a program to eachother part.
+Data-flow analysis is a key part of code optimization. [2.1, p.12]
+
+The science of code optimization [2.1, p.15, 1.4.2]
+
+A high-level programming language defines a programming abstraction: the
+programmer expresses an algorithm using the language, and the compiler must
+translate that program to the target language. Generally, higher-level programming languages are easier to program in, but are less efficient, that is, the target
+programs run more slowly. Programmers using a low-level language have more
+control over a computation and can, in principle, produce more efficient code. [2.1, p.17]
+
+A body of compiler optimizations, known as data-ow optimizations, has been developed to analyze
+the ow of data through the program and removes redundancies across these
+constructs. They are effective in generating code that resembles code written by a skilled programmer at a lower level. [2.1, p.18]
+Read about data flow optimization?
+
+TODO:
+Should we describe the connection with the EVM here or move the entire "EVM" section to the "Compilation and bytecode" chapter?
+
+## Chapter 3. Blockchain programming languages comparison
+
+### 3.1. List of programming languages for blockchain development
+
+#### 3.1.1. Solidity
+
+#### 3.1.2. Yul
+
+#### 3.1.3. Vyper
+
+#### 3.1.4. eWASM
+
+#### 3.1.5. Fe
+
+#### 3.1.6. Flint
+
+### 3.2. Criterias for comparison
+
+[2.1: 1.5.5, 1.6]
