@@ -593,17 +593,271 @@ Smart contract developers must carefully manage gas costs to optimize their cont
 
 ### 2.1. Programming languages
 
-TODO:
+#### 2.1.1. Overview
 
-- Declarative / imperative
-- static / dynamic typing
-- object-oriented / functional / procedural programming
-- which language generation / abstraction level
-- memory-management tools (garbage collection)
-- type checking
-- bounds checking
-- static / dynamic scope
-- explicit access control
+Programming languages are formal systems designed for writing instructions that computers can interpret and execute. They act as a bridge between human logic and machine operations, enabling developers to communicate tasks to a computer in a structured and efficient manner. Each language has its own set of rules, syntax, and semantics that dictate how instructions are written and executed, allowing for the creation of software ranging from simple scripts to complex applications.
+
+At their core, programming languages abstract the complexities of hardware, making it easier for developers to focus on solving problems rather than dealing with low-level machine operations. They provide tools for controlling the flow of execution, manipulating data, and interacting with external systems. Over time, various languages have emerged, each with distinct characteristics and specialized use cases, catering to different programming paradigms and problem domains.
+
+While all programming languages share a common goal—enabling human interaction with computers—they differ significantly in terms of structure, performance, and usability. These differences can be analyzed through several key features, such as paradigms, typing systems, memory management models, and more. Understanding these features provides insight into how different programming languages function and what makes them suitable for particular types of tasks.
+
+#### 2.1.2. Key Features of Programming Languages
+
+##### 2.1.2.1. Paradigms
+
+Programming paradigms define the style or methodology used to structure and develop programs. They represent different ways to approach problem-solving in programming, and languages often support one or more paradigms.
+
+**Procedural Paradigm**. In procedural languages, code is organized into procedures or functions. These functions consist of a sequence of statements that are executed step-by-step. For example, C and Fortran are classical procedural languages.
+
+Procedural languages emphasize control flow, where the program's logic follows a defined sequence of operations.
+
+**Object-Oriented Paradigm**. Object-Oriented Programming (OOP) organizes programs into classes and objects. Objects represent real-world entities, and classes define their properties and behavior. OOP languages, such as Java, C++, and Python, use concepts like inheritance, polymorphism, and encapsulation.
+
+**Functional Paradigm**. Functional programming treats computation as the evaluation of mathematical functions. It emphasizes immutability and avoids changing state or mutable data. Haskell and Lisp are pure functional languages, while Python, JavaScript, and C# have functional programming features.
+
+Functional languages favor higher-order functions and recursion over loops.
+
+**Logic Paradigm**. Logic programming focuses on defining facts and rules to solve problems through logical inference. Prolog is a common language in this paradigm.
+This example defines simple facts about who likes certain foods, and Prolog can infer relationships based on these facts.
+
+**Declarative Paradigm**. In declarative programming, the programmer specifies what the program should achieve, rather than how it should do so. SQL is a classic example of a declarative language:
+
+```sql
+SELECT name, age FROM users WHERE age > 30;
+```
+
+Here, the query declares what data the user wants without specifying the procedure for retrieving it.
+
+Many modern languages support multiple paradigms. For example, Python supports procedural, object-oriented, and functional paradigms, while JavaScript supports both functional and object-oriented styles. Each paradigm offers unique advantages, making certain types of problems easier to solve using a specific approach.
+
+##### 2.1.2.2. Typing Discipline
+
+Typing discipline refers to how a programming language handles data types, and it influences error prevention, performance, and code maintainability. There are two primary distinctions: static vs. dynamic typing and strong vs. weak typing.
+
+**Static Typing**. In statically typed languages, variable types are known and checked at compile-time. This ensures that errors related to type mismatches are caught early, before the program runs. Examples of statically typed languages include Java, C, and Rust. A simple type declaration in Java looks like this:
+
+```java
+int age = 30;
+```
+
+If you try to assign a string to age, the program will not compile, catching the error early:
+
+```java
+int age = "thirty"; // Error: incompatible types
+```
+
+**Dynamic Typing**. Dynamically typed languages perform type checking at runtime. This means variable types are inferred when the code is executed, allowing for greater flexibility. However, errors related to types may only surface when the program is run, which can sometimes lead to runtime errors. Examples of dynamically typed languages are Python, JavaScript, and Ruby:
+
+```python
+age = 30
+age = "thirty" # No immediate error, only at runtime if misused
+```
+
+**Strong Typing**. Strongly typed languages strictly enforce type rules, prohibiting implicit conversions between incompatible types. In Python, for example, you cannot automatically concatenate a string and an integer:
+
+```python
+age = 30
+print("Age: " + age) # TypeError: can only concatenate str (not "int") to str
+```
+
+The same in JavaScript, a weakly typed language, would be allowed.
+
+**Weak Typing**. Weakly typed languages allow implicit conversions between types, sometimes leading to unexpected behavior. JavaScript, for instance, is weakly typed and will coerce types automatically:
+
+```javascript
+let result = 5 + "5"; // Output: "55"
+```
+
+This flexibility can be convenient but also prone to subtle bugs if not handled carefully.
+
+Languages like TypeScript (a superset of JavaScript) add static typing to a dynamically typed, weak language, providing type safety while retaining JavaScript’s flexibility. Another example is C++, which is statically and weakly typed, allowing implicit type conversions between some types but enforcing strict type compatibility for others.
+
+##### 2.1.2.3. Syntax and Semantics
+
+The syntax of a programming language refers to its set of rules that define how programs should be written, while semantics deals with the meaning or behavior of the code when executed. These two aspects help define the readability, learnability, and usability of a language.
+
+**Human Readability**. Languages vary greatly in terms of human readability. Python, for example, is designed to be easily readable, using indentation to define blocks of code instead of curly braces or keywords:
+
+```python
+if age >= 18:
+print("Adult")
+```
+
+In the C language, for example, the braces would be required.
+
+Python's syntax emphasizes readability and simplicity, making it an excellent choice for beginners and rapid development. Other languages, such as Perl, may prioritize expressiveness and flexibility over readability:
+
+```perl
+print "Adult\n" if $age >= 18;
+```
+
+**Grammar Formalism**. The formal rules that define the structure of a language are defined by its grammar. Grammars are often based on Backus-Naur Form (BNF) or other formal grammar notations. While these are more relevant for compiler developers and language designers, they influence how expressive and flexible a language is.
+
+**Semantics**. While syntax governs how programs are written, semantics deal with what those programs do. Consider the following two examples of assignment:
+
+In Python:
+
+```python
+x = 5 # Assigns the value 5 to the variable x
+```
+
+In Haskell (a functional language):
+
+```haskell
+x = 5 -- Declares that x is always equal to 5 (an equation)
+```
+
+While the syntax looks similar, the semantics are quite different. In Python, x = 5 is an instruction to assign a value to a variable, but in Haskell, x = 5 is a declaration that defines a constant relationship.
+
+Some languages have strict rules for code structure and semantics (like Java), while others are more permissive (like JavaScript). Understanding the semantics of a language is crucial for writing correct programs, as it dictates the behavior of operations, function calls, and program flow.
+
+##### 2.1.2.4. Memory management
+
+Memory management refers to how a programming language handles the allocation, use, and release of memory during the execution of a program. Efficient memory management is crucial for both performance and reliability, as poor management can lead to issues such as memory leaks, excessive resource consumption, and program crashes.
+
+**Manual Memory Management**. In languages with manual memory management, developers are responsible for explicitly allocating and deallocating memory. C and C++ are common examples where the programmer uses functions like malloc() and free() in C or the new and delete operators in C++:
+
+```c
+int* ptr = (int*) malloc(sizeof(int));  // Allocating memory manually
+*ptr = 10;
+free(ptr); // Freeing memory manually
+```
+
+If a developer forgets to release the allocated memory, it can cause a memory leak, where the memory remains occupied without being used.
+
+**Automatic Memory Management (Garbage Collection)**. Many modern languages handle memory automatically through garbage collection. The system periodically checks for memory that is no longer in use and reclaims it without developer intervention. Java and Python both use garbage collection:
+
+```java
+String name = new String("John");
+// No need to manually free memory; the garbage collector will reclaim it when no longer needed
+```
+
+In Python, for instance, garbage collection is automatic, and developers rarely need to worry about memory leaks. However, this abstraction can sometimes lead to performance overhead, particularly if the garbage collector runs frequently.
+
+**Reference Counting**. Some languages, like Objective-C and Swift, use reference counting, a form of automatic memory management. Every object keeps track of how many references point to it, and when the reference count reaches zero, the object is deallocated:
+
+```swift
+var person: Person? = Person(name: "John")
+person = nil  // Reference count drops to zero, so memory is freed
+```
+
+This method is simple but can introduce problems with circular references, where two or more objects reference each other, preventing their memory from being freed.
+
+**Memory Pools**. Some languages allow developers to create memory pools or use arenas, where large blocks of memory are preallocated, and allocations come from this pool. Rust uses a system where ownership and borrowing rules manage memory, and explicit allocation and deallocation are not always necessary.
+
+```rust
+let x = Box::new(5);  // Memory is allocated automatically in Rust
+```
+
+##### 2.1.2.5. Compilation model
+
+Programming languages can differ significantly in how they are transformed into executable code, which directly affects their performance, flexibility, and usage scenarios. The compilation model refers to the process a language follows to transform source code into an executable form.
+
+**Compiled Languages**. In compiled languages, the source code is translated into machine code, which the computer can directly execute. This process happens once, typically before the program is run. Compiled languages, such as C, C++, and Rust, generally offer high performance because the code is optimized for the specific machine it will run on. Here's a basic compilation flow:
+
+```c
+gcc program.c -o program  // Compiles C source code into machine code
+```
+
+Once compiled, the program runs natively on the hardware without needing an interpreter or runtime.
+
+**Interpreted Languages**. In interpreted languages, the source code is executed line-by-line by an interpreter at runtime, rather than being compiled beforehand. Python, Ruby, and JavaScript are common examples of interpreted languages. Interpreted languages tend to be slower than compiled ones due to the overhead of interpretation, but they offer advantages like ease of debugging and platform independence:
+
+```python
+python script.py  # Runs the Python script through the interpreter
+```
+
+No machine code is generated, and the interpreter executes the instructions directly.
+
+**Just-in-Time (JIT) Compilation**. JIT compilation is a hybrid approach used by languages like Java and JavaScript (in modern engines). The source code is initially interpreted, but during execution, parts of the code that are frequently run are compiled into machine code on the fly. This provides a balance between performance and flexibility. In Java, the source code is compiled into bytecode, which the Java Virtual Machine (JVM) interprets and JIT compiles as needed:
+
+```java
+javac Program.java  // Compiles into bytecode
+java Program // JVM interprets and JIT compiles the bytecode
+```
+
+**Ahead-of-Time (AOT) Compilation**. Some languages, such as Swift, use AOT compilation, which compiles code directly into machine code, similar to traditional compilation models but with greater flexibility for optimizing specific platforms.
+
+##### 2.1.2.6. Concurrent Support
+
+Concurrency enables a program to perform multiple tasks simultaneously, which is important for improving performance in multi-core or distributed systems. Different languages implement concurrency in various ways:
+
+**Multithreading**. Languages like Java support multithreading, where separate threads are created to run tasks in parallel. Threads can improve performance for CPU-bound tasks, but managing synchronization between them can be complex, leading to race conditions or deadlocks.
+
+```java
+Thread t = new Thread(() -> {
+// Code runs in a separate thread
+});
+t.start();
+```
+
+**Asynchronous Programming**. Asynchronous programming is common in languages like JavaScript and Python. It allows tasks like I/O operations to run concurrently without creating new threads. This approach is efficient for handling tasks that involve waiting, such as network requests.
+
+```javascript
+async function fetchData() {
+  const data = await fetch("https://api.example.com");
+  console.log(data);
+}
+```
+
+**Coroutines**. Used in Python and Kotlin, coroutines are a lightweight alternative to threads. They allow for cooperative multitasking, yielding control when waiting on other tasks to complete.
+
+```python
+async def task():
+await another_task()
+```
+
+Concurrency models vary, and the choice depends on the nature of the task. CPU-intensive tasks may benefit from multithreading, while I/O-bound operations are more efficiently handled through asynchronous programming or coroutines.
+
+##### 2.1.2.7. Level of abstraction
+
+The level of abstraction refers to how close a programming language is to machine code versus human thinking. High-level languages abstract away most hardware details, while low-level languages offer fine control over system resources.
+
+**High-Level Languages**. Languages like Python and Java prioritize ease of use by abstracting memory management, file handling, and system calls. This makes development faster and easier but at the cost of performance. For example, Python's file handling:
+
+```python
+with open('file.txt', 'r') as file:
+    data = file.read()
+```
+
+**Low-Level Languages**. C and Assembly are low-level languages that provide direct control over memory and hardware. This allows developers to write highly optimized code but requires more effort:
+
+```c
+int* ptr = malloc(sizeof(int));
+*ptr = 10;
+```
+
+**Mid-Level Languages**. C++ offers a mix of both high- and low-level features, providing object-oriented programming while allowing manual memory management with pointers.
+
+##### 2.1.2.8. Error handling
+
+Error handling ensures that programs can respond to unexpected situations without crashing. Different languages approach error handling in various ways:
+
+**Exceptions**. Many languages, such as Python and Java, use exceptions to handle errors. When an error occurs, an exception is "thrown" and can be "caught" by the program to manage the issue without crashing.
+
+```python
+try:
+result = 10 / 0
+except ZeroDivisionError:
+print("Cannot divide by zero")
+```
+
+**Error Codes**. In languages like C, errors are handled by returning special values or codes from functions, and the developer must check for errors manually:
+
+```c
+FILE \*file = fopen("file.txt", "r");
+if (file == NULL) {
+printf("Error: Could not open file\n");
+}
+```
+
+**Assertions**. Assertions are used to check conditions during execution. If the condition fails, the program raises an error. This is often used for debugging:
+
+```python
+assert x > 0, "x must be positive"
+```
+
+Effective error handling is crucial for building reliable software. Exceptions offer structured error management, while error codes give more manual control but require careful checking.
 
 ### 2.2. Compilation process
 
