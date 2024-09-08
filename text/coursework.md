@@ -382,7 +382,45 @@ Message calls are fundamental to the interaction between contracts within the Et
 
 ### 1.3. Bytecode
 
-TODO: explain the bytecode structure, how opcodes are extracted etc.
+In Ethereum, bytecode refers to the low-level machine code that is executed by the Ethereum Virtual Machine (EVM). This code is the result of compiling high-level programming languages like Solidity or Vyper into a format that the EVM can understand and execute. Bytecode plays a critical role in how smart contracts are deployed, executed, and interacted with on the blockchain. Understanding its structure, functionality, and the distinction between different types of bytecode is essential for developers and researchers working with Ethereum.
+
+#### 1.3.1. Structure of Bytecode
+
+Ethereum bytecode consists of a series of hexadecimal values, each representing a specific instruction for the EVM to execute. These instructions, known as opcodes, dictate the operations the EVM must perform, such as arithmetic operations, storage access, flow control, and interaction with external contracts. Each opcode is 1 byte (2 hexadecimal characters), followed by any necessary parameters or arguments.
+
+For example, a simple operation like `ADD` (which adds two numbers) is represented by the opcode `0x01`. More complex operations such as `SSTORE` (store a value in contract storage) are represented by opcodes like `0x55`.
+
+A sample segment of Ethereum bytecode might look like this:
+
+```hex
+6080604052348015600f57600080fd5b50604051602080610100833981018060405281019080805182019291906020018051820192919050505061004c8061004a6000396000f3fe6080604052600080fdfea26469706673582212206d0d22d2b5bc5b08cfb4101917a9e0f08045c7f6b6c33e47d33f7419eebfd7a864736f6c63430008000033
+```
+
+The bytecode is composed of individual opcodes that the EVM interprets and executes sequentially. To extract opcodes from bytecode, a common method is to split the bytecode into segments of 2 hex characters (1 byte) and map them to known EVM opcodes using a reference table.
+
+For example, consider the following simple bytecode:
+
+```hex
+6001600101
+```
+
+Breaking this down:
+
+- `60` (PUSH1) pushes the value 01 onto the stack.
+- `60` (PUSH1) pushes the value 01 again onto the stack.
+- `01` (ADD) adds the two values on the stack.
+
+This bytecode adds two numbers, both 1, resulting in a value of 2 on the stack.
+
+#### 1.3.2. Deployment and execution bytecode
+
+There are two types of bytecode associated with smart contracts in Ethereum: deployment (initialization) bytecode and execution (deployed) bytecode. These bytecode types serve different purposes in the lifecycle of a smart contract.
+
+**Deployment Bytecode** is the code responsible for initializing a smart contract. It is included in the transaction that deploys the contract to the blockchain. The deployment bytecode contains both the constructor logic of the contract and the code responsible for returning the contract’s execution bytecode. Once this bytecode is executed, the contract is stored on the blockchain, and only the execution bytecode remains active.
+
+For example, when a smart contract is deployed, the deployment bytecode handles tasks like setting initial values in storage, executing constructor functions, and allocating contract-specific resources. After the deployment process is complete, the EVM discards the initialization code, leaving only the execution bytecode on the blockchain.
+
+**Execution Bytecode** is what remains on the blockchain once a smart contract is deployed, and is invoked when users or other contracts interact with the contract. This bytecode defines the contract's logic and handles function calls, event emissions, and interactions with external accounts or contracts. Unlike the deployment bytecode, which is executed once during contract creation, the execution bytecode persists on the blockchain and is executed each time the contract is called.
 
 ### 1.4. Ethereum Virtual Machine
 
@@ -529,7 +567,27 @@ until either the system is in an exceptional halting state, which discards all c
 
 ### 1.5. Fee sources conslusion
 
-TODO: describe main sources of gas fees after reviewing how gas fees are calculated in the EVM.
+In Ethereum, gas fees are the fundamental mechanism that ensure fair compensation for computational resources consumed by smart contracts and transactions. As explained in the previous subchapter, users pay gas fees to cover the costs of various operations performed by the Ethereum Virtual Machine (EVM). These fees are required for executing opcodes, storing data, and interacting with the blockchain. To optimize the efficiency of smart contracts and minimize costs, it is essential to understand the key sources of gas consumption.
+
+#### 1.5.1. Main Sources of Gas Fees
+
+1. Computation: The EVM performs numerous operations during contract execution, each represented by an opcode. Some opcodes are computationally expensive, consuming significant gas, while others are relatively lightweight. Appendix G of the Ethereum Yellow Paper defines the gas cost for each opcode, with the following consuming the most gas:
+
+- `EXP` (`0x0A`): Exponentiation is one of the most gas-intensive operations, with a base cost of 10 gas and an additional cost of 50 gas for every byte in the exponent.
+- `SLOAD` (`0x54`): Loading data from contract storage is expensive, costing 100 gas per access.
+- `SSTORE` (`0x55`): Storing data in contract storage is one of the most expensive operations, costing 20,000 gas to add new storage and 5,000 gas to modify existing storage.
+- `CALL` (`0xF1`): External contract calls are costly due to the complexity involved. They have a base cost of 700 gas, with additional gas based on the contract's execution complexity.
+- `CREATE` (`0xF0`): Deploying a new contract is expensive, requiring 32,000 gas plus the cost of executing the initialization bytecode.
+- `LOGn` (`0xA0`–`0xA4`): Logging operations (event emissions) can consume between 375 gas and 8 gas per byte of data logged.
+- `Storage`: Contract storage is a major source of gas fees. Operations that interact with storage, such as `SSTORE` and `SLOAD`, are expensive because they require changes to the blockchain’s persistent state. Storing large amounts of data or frequently accessing storage can significantly drive up the cost of executing smart contracts.
+
+2. Memory and Stack Usage: While operations involving memory and the stack are less expensive than storage operations, they still contribute to gas consumption. Operations like MLOAD (3 gas) and MSTORE (3 gas) cost relatively little, but inefficient memory management can accumulate costs over many operations.
+
+3. External Interactions: Interacting with external contracts or sending Ether through CALL or CREATE incurs substantial gas fees. Each call requires gas for both the base operation and the execution of the called contract, making contract-to-contract interactions one of the primary fee sources.
+
+#### 1.5.2. Fee Optimization Considerations
+
+Smart contract developers must carefully manage gas costs to optimize their contract’s performance and affordability. Reducing interactions with storage, minimizing computationally expensive operations, and efficiently managing memory are all key strategies for lowering gas consumption. Furthermore, gas refunds can be earned by deleting storage variables using the SSTORE opcode, which refunds part of the gas used, incentivizing more efficient use of the blockchain's resources.
 
 ## Chapter 2. Programming languages and compilation
 
