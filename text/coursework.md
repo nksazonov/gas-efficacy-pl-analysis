@@ -992,20 +992,446 @@ Should we describe the connection with the EVM here or move the entire "EVM" sec
 
 ## Chapter 3. Blockchain programming languages comparison
 
-### 3.1. List of programming languages for blockchain development
+Blockchain development involves selecting the right programming language to build efficient, secure, and scalable decentralized applications (DApps) and smart contracts. Given the unique demands of blockchain environments, different languages offer varying levels of performance, security, and resource efficiency, especially regarding gas consumption. This chapter will compare the most widely used programming languages in blockchain development, focusing on their features and gas efficacy.
+
+Building on the programming language characteristics outlined in the previous chapter, each language will be analyzed based on its typing system, memory management, concurrency model, and error handling mechanisms. Special attention will be given to gas optimization, a critical factor in Ethereum, where computational efficiency directly impacts transaction costs. Through a detailed analysis of the strengths and limitations of each language, this chapter aims to provide insights into the trade-offs that developers must consider when choosing a language for blockchain programming.
+
+### 3.1. Programming languages for blockchain development
+
+In the Ethereum ecosystem, several programming languages have emerged to support the development of smart contracts and decentralized applications (DApps). These languages are specifically designed or adapted to meet the unique requirements of blockchain environments, such as immutability, security, and gas efficiency. In this section, we will explore the most widely used programming languages for Ethereum-compatible blockchains, providing descriptions and categorizing them based on key features such as typing discipline, memory management, error handling, and more.
+
+While programming languages can typically be grouped based on their compilation models or concurrency support, we will omit these categorizations in this section. This is because, in the context of Ethereum, all smart contracts are ultimately compiled into Ethereum Virtual Machine (EVM) bytecode, regardless of the language used. Similarly, there is no concept of concurrency in Ethereum, as the platform processes transactions sequentially to maintain a consistent global state across the network.
+
+The following analysis will focus on the technical features that differentiate these languages, helping to clarify the strengths and limitations of each for blockchain development. By understanding these distinctions, developers can make informed decisions about which language is best suited for their projects.
 
 #### 3.1.1. Solidity
 
-#### 3.1.2. Yul
+Solidity is a statically typed, contract-oriented programming language specifically designed for developing smart contracts on the Ethereum platform. Introduced in 2014 by Gavin Wood, one of the co-founders of Ethereum, Solidity has become the most popular language for writing decentralized applications (DApps) and executing smart contracts on Ethereum and other EVM-compatible blockchains. Its syntax is similar to JavaScript and C++, making it accessible for developers familiar with these languages. Solidity was developed to handle the creation, execution, and management of self-enforcing contracts, and it plays a central role in enabling decentralized finance (DeFi), non-fungible tokens (NFTs), and various blockchain applications.
+
+Solidity Features include:
+
+**Paradigm**
+Solidity is primarily an object-oriented and contract-oriented language. Each smart contract is akin to a class in object-oriented programming, with state variables, functions, and modifiers that dictate behavior. The contract paradigm enforces encapsulation, where contracts hold their own data and logic, making Solidity well-suited for developing decentralized applications with isolated functionalities.
+
+Example of a contract in Solidity:
+
+```solidity
+pragma solidity ^0.8.0;
+
+contract SimpleStorage {
+    uint storedData;
+
+    function set(uint x) public {
+        storedData = x;
+    }
+
+    function get() public view returns (uint) {
+        return storedData;
+    }
+}
+```
+
+**Typing Discipline**
+Solidity is statically typed and strongly typed. Variables and data types must be declared explicitly, and the language enforces strict type rules, reducing the likelihood of type-related errors. For example, variables must be explicitly declared as uint, int, address, bytes, or bool types, among others. The strong typing ensures that operations on incompatible types are flagged at compile time.
+
+```solidity
+uint age = 25;
+address walletAddress = 0xAb8483F64d9C6d1EcF9b849Ae677dD3315835Cb2;
+```
+
+**Memory Management**
+Solidity relies on automatic memory management, where the Ethereum Virtual Machine (EVM) handles memory allocation and deallocation during contract execution. However, developers are required to specify whether variables are stored in storage (persistent data) or memory (temporary data). Incorrect handling of these storage types can lead to inefficient gas usage.
+
+```solidity
+function setMemoryVariable(uint data) public pure returns(uint) {
+    uint memoryVariable = data;  // Stored in memory
+    return memoryVariable;
+}
+```
+
+**Syntax and Semantics**
+Solidity’s syntax is heavily influenced by JavaScript and C++, making it familiar to developers from web and system programming backgrounds. It includes control structures such as if, else, for, and while. Contracts in Solidity define functions, events, and state variables, and the language supports modifiers that can change the behavior of functions. Semantically, contracts operate as autonomous agents that execute their logic in response to external inputs.
+
+```solidity
+function increment(uint x) public pure returns (uint) {
+    return x + 1;
+}
+```
+
+**Error Handling**
+Solidity uses an exception-based error handling system. When a contract encounters an error, it can revert the state to prevent unintended side effects. Errors can be handled using require(), assert(), and revert(). The require statement is often used for input validation, assert is used to enforce invariants, and revert allows for more explicit error messaging.
+
+```solidity
+function divide(uint a, uint b) public pure returns (uint) {
+    require(b > 0, "Cannot divide by zero");
+    return a / b;
+}
+```
+
+The try/catch mechanism, introduced in later versions of Solidity, allows contracts to handle errors from external function calls, making it easier to recover from execution failures.
+
+```solidity
+try externalContract.someFunction() {
+    // Success case
+} catch {
+    // Error case
+}
+```
+
+**Level of Abstraction**
+Solidity is a high-level language designed to abstract much of the low-level EVM details from the developer. However, developers must still manage gas usage and optimize their code to prevent excessive costs. Its high-level constructs allow developers to write complex logic without worrying about direct machine code, but it also gives access to lower-level details when needed, such as inline assembly.
+
+```solidity
+assembly {
+    let result := add(1, 2)
+}
+```
 
 #### 3.1.3. Vyper
 
-#### 3.1.4. eWASM
+**Short Description and History**
+Vyper is a statically typed, contract-oriented programming language designed to improve the security and simplicity of smart contract development on the Ethereum platform. It was introduced as an alternative to Solidity, with a focus on providing a more readable and secure syntax, inspired by Python. The language aims to minimize complexity, limit features that could introduce vulnerabilities, and prioritize human readability and auditability of smart contracts. Vyper was developed to enforce stricter rules, reduce the likelihood of developer errors, and make smart contracts easier to verify and analyze, thus promoting safe blockchain development.
+
+**Vyper Features** include:
+
+**Paradigm**
+Vyper is contract-oriented and focuses on security and simplicity. Like Solidity, Vyper organizes code into smart contracts that hold data and define behavior. However, Vyper’s design philosophy is to keep the language simple and minimalistic, removing features that are seen as potentially unsafe, such as function overloading and class inheritance.
+
+Example of a simple Vyper contract:
+
+```python
+stored_data: public(uint256)
+
+@external
+def set_data(x: uint256):
+self.stored_data = x
+
+@view
+@external
+def get_data() -> uint256:
+return self.stored_data
+```
+
+**Typing Discipline**
+Vyper is statically typed and strongly typed, requiring developers to declare types explicitly. It enforces strict type safety to prevent type-related errors. Every variable and function argument in Vyper must have a declared type, such as uint256 or address. Vyper does not allow implicit type conversions, adding an extra layer of security by ensuring that type mismatches are caught during compilation.
+
+```python
+balance: uint256
+owner: address
+```
+
+**Memory Management**
+Vyper also relies on automatic memory management by the Ethereum Virtual Machine (EVM), similar to Solidity. However, it restricts complex memory operations to ensure that contracts are more secure and easier to audit. Vyper requires developers to declare whether data is stored in storage or memory, ensuring that resources are managed effectively.
+
+```python
+@external
+def add_data(value: uint256):
+temp: uint256 = value # Stored in memory
+```
+
+**Syntax and Semantics**
+Vyper’s syntax is deliberately simple and closely follows Python’s syntax, with an emphasis on readability and security. It removes features that could introduce security risks, such as infinite loops and dynamic code generation. Vyper supports if, else, and for control structures, but with constraints to ensure safe execution. This simplicity makes it easier for developers and auditors to reason about the code.
+
+```python
+if self.stored_data > 100:
+return True
+else:
+return False
+```
+
+Unlike Solidity, Vyper does not allow complex control structures like while loops, which could lead to gas exhaustion.
+
+**Error Handling**
+Vyper employs a strict error handling model using assertions and condition checks. It uses the assert statement to enforce conditions that must hold true for the contract to proceed. If an assertion fails, the transaction is reverted, preventing unintended changes to the blockchain state. Vyper does not have exception handling, focusing instead on avoiding errors through simplicity and stricter checks at compile time.
+
+```python
+@external
+def divide(a: uint256, b: uint256) -> uint256:
+assert b > 0, "Cannot divide by zero"
+return a / b
+```
+
+**Level of Abstraction**
+Vyper is considered a high-level language with a higher degree of abstraction than Solidity, but its minimalistic nature reduces its overall complexity. It abstracts away many low-level EVM operations while retaining enough control for developers to optimize gas usage. Its strict design prevents the use of lower-level constructs like inline assembly, as they are seen as potential security risks. The language prioritizes simplicity and auditability, making it ideal for writing secure contracts, but limiting some of the flexibility offered by Solidity.
+
+#### 3.1.3. Yul
+
+**Short Description and History**
+Yul is an intermediate-level, assembly-like language designed as a common intermediary for multiple backends in the Ethereum ecosystem, including Ethereum 1.0, Ethereum 2.0, and Ethereum-flavored WebAssembly (eWASM). It is primarily used for optimizing smart contracts by providing a more direct and efficient way to interact with the Ethereum Virtual Machine (EVM) compared to high-level languages like Solidity. Yul is tightly integrated with Solidity but can also be used as a standalone language to write low-level code. It supports a simplified structure that is useful for developers seeking to fine-tune contract performance or reduce gas costs. Yul can be compiled directly to bytecode and offers more control over low-level operations, making it a powerful tool for Ethereum smart contract development.
+
+**Yul Features** include:
+**Paradigm**.
+Yul is a procedural and low-level language, focusing on direct interaction with the EVM. It is designed for use cases where performance optimization is crucial, offering fine-grained control over computational steps. In contrast to object-oriented paradigms like Solidity, Yul emphasizes simple, sequential execution and allows developers to write functions, loops, and basic control structures in a straightforward, assembly-like format.
+
+Example of a Yul function:
+
+```yul
+function add(x, y) -> sum {
+    sum := add(x, y)
+}
+```
+
+**Typing Discipline**.
+Yul is dynamically typed and weakly typed, meaning that variables can hold any type of value and type checking is minimal. Yul does not enforce strict type rules as higher-level languages do, allowing for greater flexibility in low-level programming. All values are treated as 256-bit words, which map directly to the way the EVM operates.
+
+Example of simple variable declaration in Yul:
+
+```yul
+let x := 10
+let y := 0xFF  // Hexadecimal representation
+```
+
+**Memory Management**.
+In Yul, developers must manually manage memory and storage, providing more control over how data is handled during execution. Memory in Yul is linear and unstructured, which gives the developer direct control over allocating and accessing memory locations. The mstore and mload opcodes are used to store and retrieve data from memory, while sstore and sload are used for interacting with storage (persistent data).
+
+Example of memory manipulation in Yul:
+
+```yul
+let ptr := mload(0x40)  // Load free memory pointer
+mstore(ptr, 42)  // Store value 42 at the free memory location
+```
+
+Storage is managed similarly:
+
+```yul
+sstore(0x0, 1)  // Store value 1 in storage slot 0
+```
+
+**Syntax and Semantics**.
+Yul has a minimalistic and assembly-like syntax, designed to be readable yet close to the underlying machine code. It includes basic control structures like if statements and loops (for and while), allowing developers to build logical flow control for complex operations while keeping the syntax straightforward. The simplicity of Yul’s syntax makes it well-suited for optimizing smart contracts where the focus is on performance rather than readability or expressiveness.
+
+Example of an if statement in Yul:
+
+```yul
+if eq(x, y) {
+    return(0, 0)
+}
+```
+
+Yul also allows for loops:
+
+```yul
+for { let i := 0 } lt(i, 10) { i := add(i, 1) } {
+    // Loop body
+}
+```
+
+**Error Handling**.
+Yul provides minimal error handling. It does not have high-level constructs for handling errors such as exceptions or require statements like Solidity. Instead, error handling is typically done by reverting transactions using the revert opcode, which halts execution and returns the unused gas to the sender. This low-level approach places the burden on the developer to manage errors manually.
+
+Example of reverting a transaction in Yul:
+
+```yul
+if iszero(success) {
+    revert(0, 0)
+}
+```
+
+Errors must be handled explicitly by checking conditions and reverting if necessary, leaving little room for complex error-handling logic.
+
+Since Yul is designed for low-level programming, it lacks built-in error-handling structures beyond transaction reversion. Developers must explicitly check for errors in contract logic and handle them manually using the EVM’s native error mechanisms. This approach reduces the overhead associated with high-level error handling but requires careful attention to avoid unintended behavior.
+
+```yul
+let success := call(gas(), toAddress, value, inputData, inputSize, outputData, outputSize)
+if iszero(success) {
+revert(0, 0) // Explicit error handling
+}
+```
+
+**Level of Abstraction**.
+Yul is a low-level language, offering minimal abstraction over the Ethereum Virtual Machine (EVM). It is designed to be closer to assembly language, giving developers precise control over gas usage and performance optimization. Unlike higher-level languages like Solidity or Vyper, Yul exposes low-level EVM details, enabling developers to write highly efficient code. The language's low abstraction makes it suitable for writing optimized and gas-efficient contracts, but it comes at the cost of increased complexity and manual management of resources like memory and gas.
+
+Example of low-level manipulation using assembly in Yul:
+
+```yul
+let result := add(2, 3) // Low-level arithmetic operation
+```
+
+#### 3.1.4. Yul+
+
+**Short Description and History**
+Yul+ is an extension of the Yul intermediate language designed to improve the expressiveness and security of low-level contract development on Ethereum. Developed by the Solidity team, Yul+ builds on Yul’s minimalistic syntax while adding features that provide developers with more control and flexibility when interacting with the Ethereum Virtual Machine (EVM). Yul+ is often used in the context of advanced optimization for smart contracts or during the compilation of high-level Solidity code down to more efficient bytecode. It allows developers to implement gas-efficient logic and achieve greater control over memory, storage, and low-level execution, while still offering more functionality compared to plain Yul.
+
+Yul+ adds features such as user-defined functions with parameter validation and return types, error handling improvements, and more structured control flows, making it more versatile for writing low-level code.
+
+**Yul+ Features** include:
+**Paradigm**
+Like Yul, Yul+ is primarily a procedural and low-level language, but it introduces more high-level constructs for function definitions, making it more flexible for certain programming patterns. It supports simple procedures and state transitions, with an emphasis on gas optimization and control over execution.
+
+Example of a Yul+ function with input and output validation:
+
+```yul
+function multiply(a: uint256, b: uint256) -> result {
+    result := mul(a, b)
+}
+```
+
+**Typing Discipline**
+Yul+ retains dynamic typing but introduces more explicit handling of input and output types in functions, unlike Yul’s entirely weak typing. Variables in Yul+ can still hold any type of value as 256-bit words, but function parameters can be constrained by types for better validation. This provides a slightly stricter development model compared to Yul while retaining the flexibility of low-level memory manipulation.
+
+Example with parameter typing:
+
+```yul
+function add(a: uint256, b: uint256) -> sum {
+    sum := add(a, b)
+}
+```
+
+**Memory Management**
+Like Yul, Yul+ requires manual memory management, allowing developers to control the allocation and retrieval of data from memory and storage directly. It provides functions like mstore and mload for manipulating memory and sstore and sload for storage. Yul+ also offers the ability to define memory layouts more explicitly, making it easier to work with complex data structures while minimizing gas usage.
+
+Example of memory manipulation in Yul+:
+
+```yul
+let ptr := mload(0x40)  // Load the free memory pointer
+mstore(ptr, 100)  // Store 100 at the pointer address
+```
+
+Storage access
+
+```yul
+sstore(0x1, 500)  // Store 500 in storage slot 1
+```
+
+**Syntax and Semantics**
+Yul+ extends Yul’s minimalistic and assembly-like syntax by adding more structured constructs. It includes if, for, and while loops, similar to Yul, but offers improved function definitions and better handling of control flows. Yul+ also introduces more readable and secure code structures, which makes it easier for developers to write optimized yet maintainable smart contracts.
+
+Example of an if statement and a loop in Yul+:
+
+```yul
+if eq(a, 1) {
+    revert(0, 0)
+}
+
+for { let i := 0 } lt(i, 10) { i := add(i, 1) } {
+    // Loop body
+}
+```
+
+The addition of structured functions with return types and parameter validation is a key improvement in Yul+ over Yul.
+
+**Error Handling**
+Yul+ enhances error handling by improving support for reverts and adding better handling of function failures. Like Yul, Yul+ allows for explicit error checking and reverts using the revert opcode. However, Yul+ provides a clearer way to define custom revert conditions, making error handling more structured. This allows developers to write contracts that can fail gracefully with more explicit error handling logic.
+
+Example of error handling in Yul+:
+
+```yul
+let success := call(gas(), to, value, inputData, inputSize, outputData, outputSize)
+if iszero(success) {
+    revert(0, 0)
+}
+```
+
+Yul+ adds support for user-defined function error handling, giving developers more control over error management.
+
+**Level of Abstraction**
+Yul+ is a low-level language, similar to Yul, offering minimal abstraction over the Ethereum Virtual Machine (EVM). However, it introduces some higher-level features like typed function signatures and better control over memory layout. These additions provide developers with more flexibility in writing optimized code, while still maintaining the low-level access necessary for performance and gas optimization.
+
+The low-level control allows developers to optimize gas costs and performance in Ethereum contracts, but Yul+ also makes it easier to write more structured, maintainable code without sacrificing too much control.
+
+Example of low-level manipulation in Yul+:
+
+```yul
+function square(x: uint256) -> result {
+    result := mul(x, x)
+}
+```
+
+Yul+ enhances error handling by allowing for custom conditions and structured function failure, making it more robust for developers who need fine control over contract behavior.
 
 #### 3.1.5. Fe
 
-#### 3.1.6. Flint
+**Short Description and History**
+Fe is a statically typed, contract-oriented programming language designed for developing smart contracts on the Ethereum platform. Inspired by Python, Fe aims to offer a simpler, more user-friendly syntax compared to Solidity while focusing on performance and security. Fe was created as part of Ethereum's ecosystem to provide developers with an alternative to Solidity that embraces Python-like readability and usability. The language is still under development and aims to become a mature option for writing Ethereum smart contracts. It is designed to work with Ethereum's Ethereum Virtual Machine (EVM), providing access to the same execution environment as Solidity and Vyper.
+
+**Fe Features** include
+**Paradigm**
+Fe is a contract-oriented language like Solidity and Vyper, focusing on building smart contracts that hold state and define business logic. Each contract contains data (state variables) and methods (functions) that operate on that data. Fe’s contract-oriented nature makes it suitable for developing decentralized applications (DApps) and executing smart contracts in an efficient, Python-like syntax.
+
+Example of a simple contract in Fe:
+
+```fe
+contract SimpleStorage:
+pub stored_data: u256
+
+    pub def set_data(value: u256):
+        self.stored_data = value
+
+    pub def get_data() -> u256:
+        return self.stored_data
+```
+
+**Typing Discipline**
+Fe is statically typed and strongly typed, meaning that variable types must be declared explicitly and type checking occurs at compile time. Fe enforces strict type safety to prevent type-related bugs, providing developers with confidence in the correctness of their code. Common data types include u256 for unsigned integers and bool for boolean values. This strong typing reduces runtime errors caused by type mismatches.
+
+Example of variable declaration in Fe:
+
+```fe
+pub stored_data: u256
+```
+
+**Memory Management**
+Fe follows the EVM’s model of automatic memory management, but it allows developers to control whether variables are stored in storage (persistent data) or memory (temporary data). This distinction is important for managing gas consumption efficiently, as interacting with storage is more expensive. Like Solidity and Vyper, Fe’s memory management is handled through explicit declarations, but the EVM ensures proper allocation and deallocation of resources.
+
+Example of memory and storage usage in Fe:
+
+```fe
+pub def store_in_memory(value: u256) -> u256:
+let temp_value: u256 = value // Stored in memory
+return temp_value
+```
+
+**Syntax and Semantics**
+Fe’s syntax is inspired by Python, aiming to offer simplicity and readability. It supports control structures such as if, else, and for loops, similar to Python, but with a focus on contract-oriented logic. The syntax makes Fe accessible for developers who are familiar with Python, while still providing the necessary constructs for smart contract development. Semantically, Fe enforces stricter rules than Python to ensure security and performance in smart contract execution.
+
+Example of control flow in Fe:
+
+```fe
+pub def check_value(value: u256) -> bool:
+if value > 100:
+return True
+else:
+return False
+```
+
+**Error Handling**
+Fe provides exception-based error handling similar to Solidity, allowing developers to use assertions to enforce conditions that must be true during execution. If a condition fails, Fe’s contracts revert the transaction to prevent unintended state changes. Error handling in Fe is designed to be simple yet effective, ensuring that smart contracts behave predictably even when unexpected conditions arise. Fe primarily uses assert to check conditions, and failed assertions cause the contract to revert, maintaining the integrity of the blockchain.
+
+Example of error handling in Fe:
+
+```fe
+pub def divide(a: u256, b: u256) -> u256:
+assert b > 0, "Cannot divide by zero"
+return a / b
+```
+
+Example of a safe subtraction in Fe:
+
+```fe
+pub def safe_subtract(a: u256, b: u256) -> u256:
+assert a >= b, "Subtraction underflow"
+return a - b
+```
+
+**Level of Abstraction**
+Fe is considered a high-level language, offering more abstraction than lower-level languages like Yul or Yul+. It simplifies interaction with the EVM while maintaining enough control for developers to write efficient smart contracts. Fe’s abstraction focuses on ease of use, readability, and security, making it a good choice for developers who prioritize simplicity without needing to handle the fine details of EVM internals.
+
+Example of high-level function definition in Fe:
+
+```fe
+pub def increment(value: u256) -> u256:
+return value + 1
+```
 
 ### 3.2. Criterias for comparison
 
-[2.1: 1.5.5, 1.6]
+### 3.3. Gas comparison
+
+    - 3.3.1. Defining the Smart Contract for comparison
+    - 3.3.2. Developing the Smart Contract
+    - 3.3.3. Compiling the Smart Contract
+    - 3.3.4. Benchmarking the resulting bytecode
+
+## Conclusions
+
+## References
