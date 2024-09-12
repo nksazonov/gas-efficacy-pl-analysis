@@ -1087,7 +1087,7 @@ assembly {
 }
 ```
 
-#### 3.1.3. Vyper
+#### 3.1.2. Vyper
 
 **Short Description and History**
 Vyper is a statically typed, contract-oriented programming language designed to improve the security and simplicity of smart contract development on the Ethereum platform. It was introduced as an alternative to Solidity, with a focus on providing a more readable and secure syntax, inspired by Python. The language aims to minimize complexity, limit features that could introduce vulnerabilities, and prioritize human readability and auditability of smart contracts. Vyper was developed to enforce stricter rules, reduce the likelihood of developer errors, and make smart contracts easier to verify and analyze, thus promoting safe blockchain development.
@@ -1344,7 +1344,7 @@ Yul+ enhances error handling by allowing for custom conditions and structured fu
 **Short Description and History**
 Fe is a statically typed, contract-oriented programming language designed for developing smart contracts on the Ethereum platform. Inspired by Python, Fe aims to offer a simpler, more user-friendly syntax compared to Solidity while focusing on performance and security. Fe was created as part of Ethereum's ecosystem to provide developers with an alternative to Solidity that embraces Python-like readability and usability. The language is still under development and aims to become a mature option for writing Ethereum smart contracts. It is designed to work with Ethereum's Ethereum Virtual Machine (EVM), providing access to the same execution environment as Solidity and Vyper.
 
-**Fe Features** include
+**Fe Features** include:
 **Paradigm**
 Fe is a contract-oriented language like Solidity and Vyper, focusing on building smart contracts that hold state and define business logic. Each contract contains data (state variables) and methods (functions) that operate on that data. Fe’s contract-oriented nature makes it suitable for developing decentralized applications (DApps) and executing smart contracts in an efficient, Python-like syntax.
 
@@ -1425,12 +1425,266 @@ return value + 1
 
 ### 3.2. Criterias for comparison
 
+#### 3.2.1. Type Checking
+
+Type checking determines when a language checks and enforces data types, either at compile time or runtime. This affects how developers detect and fix type-related errors. Statically typed languages ensure that type mismatches are caught early, leading to more robust code and fewer runtime issues. In contrast, dynamically typed languages offer more flexibility but can increase debugging time as type errors may surface only during execution.
+
+**Values**:
+
+- **Statically Typed**: Types are checked at compile time.
+- **Dynamically Typed**: Types are checked at runtime.
+
+#### 3.2.2. Type Strength
+
+Type strength describes how strictly the language enforces its type rules, impacting how developers handle conversions between types. Strongly typed languages reduce type-related errors but may require more explicit conversions, whereas weakly typed languages allow implicit type conversions, making them easier to work with but potentially leading to unintended behavior.
+
+**Values**:
+
+- **Strongly Typed**: Strict enforcement of type rules with minimal implicit type conversion.
+- **Weakly Typed**: Allows implicit type conversion, potentially leading to more flexible code but at the cost of type safety.
+
+#### 3.2.3. Memory Management
+
+Memory management governs how a language allocates and deallocates memory, affecting performance and gas costs. Developers benefit from automatic memory management (garbage collection) in terms of reduced workload, but manual memory management allows for fine-tuning gas efficiency. Knowing where data is stored (heap, stack) and using relevant keywords can make the development process more efficient.
+
+**Values**:
+
+- **Automatic (Garbage Collection)**: Memory is automatically managed by the environment.
+- **Manual**: Developers manually allocate and free memory.
+- **Memory Locations**: Stack, Heap, Storage.
+
+#### 3.2.4. Keywords
+
+The keywords used in a language impact how easily developers can express logic and manage state. A well-designed set of keywords simplifies contract development, making the code more readable and maintainable. The variety of keywords for control flow, data types, and memory management provide necessary tools for efficient smart contract development.
+
+**Values**:
+
+- **Data Type Keywords**: Keywords like `uint256`, `bool`, etc., to define types.
+- **Functions and Variable Modifiers**: Keywords like `public`, `private`, `constant`.
+- **Exception Handling Keywords**: `require`, `assert`, `revert` to handle runtime issues.
+
+#### 3.2.5. Level of Abstraction
+
+A language's level of abstraction defines how close the language is to the underlying blockchain system. Higher-level abstractions make it easier for developers to write smart contracts quickly, but lower-level abstractions provide finer control over contract execution and gas costs, giving experienced developers more flexibility.
+
+**Values**:
+
+- **High-Level**: Abstracts most low-level details, making development easier.
+- **Low-Level**: Provides more direct control over system-level operations but at the cost of complexity.
+
+#### 3.2.6. Error Handling
+
+How a language manages errors affects its reliability and robustness. Structured error handling simplifies identifying and responding to unexpected conditions, making contracts more predictable and reducing unintended behaviors. Developers can create more resilient applications by utilizing built-in mechanisms for detecting and reverting errors.
+
+**Values**:
+
+- **Built-In Error Handling**: Languages use mechanisms like `require`, `assert`, `revert` to handle errors efficiently.
+
+#### 3.2.7. Open/Closed Source
+
+Whether a language is open-source or closed-source affects its community support and extensibility. Open-source languages often benefit from a larger contributor base, leading to faster bug fixes, more features, and a more vibrant developer ecosystem. Closed-source languages, however, might offer more control and stability, but at the cost of flexibility.
+
+**Values**:
+
+- **Open Source**: Code is available for community contributions and improvements.
+- **Closed Source**: Proprietary with limited access to the underlying code.
+
+#### 3.2.8. Adoption and Community Support
+
+The level of community support, as reflected by GitHub stars, issues, commits, and activity, can significantly impact the development experience. A larger community means more resources, tutorials, libraries, and tools are available, which can make learning and working with the language easier.
+
+**Values**:
+
+- **GitHub Stars, Issues, Commits**: A high number of stars and commits reflects strong community adoption and support.
+- **Active Community**: Frequent commits and issue resolutions show a language's development is actively maintained.
+
+#### 3.2.9. Latest Version and Release Date
+
+The latest version and frequency of releases indicate how actively a language is maintained and improved. Languages with frequent updates are more likely to incorporate new features and security patches, ensuring a better development experience over time.
+
+**Values**:
+
+- **Version Number**: The current stable version.
+- **Release Frequency**: How often new versions are published.
+
+#### 3.2.10. Number of Plugins Available for IDEs (e.g., VS Code)
+
+The number of available IDE plugins affects the ease of development. More plugins mean better tooling, such as syntax highlighting, linting, and debugging tools, all of which enhance developer productivity.
+
+**Values**:
+
+- **VS Code Plugins**: The number of available plugins for tasks like code completion, debugging, and formatting.
+
+#### 3.2.11. Compiler Features
+
+The features provided by the compiler, such as error checking, detailed warnings, and cross-platform compatibility, determine how effectively developers can write and optimize code. Comprehensive compilers reduce errors early and provide valuable feedback to the developer during the coding process.
+
+**Values**:
+
+- **Error Checking**: How effectively the compiler catches errors.
+- **Warnings**: The level of detail provided by the compiler in warning messages.
+- **Cross-Platform Support**: Whether the compiler can generate bytecode for different blockchain environments.
+
+#### 3.2.12. Compiler Optimizations
+
+Compiler optimizations reduce gas consumption and improve performance, directly impacting the cost of smart contract execution. Languages with advanced optimization mechanisms help developers write more efficient contracts without requiring manual optimization.
+
+**Values**:
+
+- **Optimization Levels**: Compiler flags for optimizing code during compilation.
+- **Gas Optimization**: Specific optimizations aimed at reducing gas consumption.
+
+#### 3.2.13. Compilation Time
+
+The time it takes to compile code affects the development cycle. Faster compilation times allow developers to iterate more quickly, making it easier to test and deploy updates frequently. Long compilation times, on the other hand, can slow down the development process and hinder productivity.
+
+**Values**:
+
+- **Time to Compile**: How fast the compiler generates bytecode from the source code. This will be evaluated based on a sample contract.
+
 ### 3.3. Gas comparison
 
-    - 3.3.1. Defining the Smart Contract for comparison
-    - 3.3.2. Developing the Smart Contract
-    - 3.3.3. Compiling the Smart Contract
-    - 3.3.4. Benchmarking the resulting bytecode
+This section defines the criteria for comparing the gas efficiency of programming languages used in Ethereum smart contract development. Gas consumption directly impacts the cost of deploying and interacting with smart contracts, making optimization crucial for developers. The gas comparison will evaluate how efficiently languages handle various operations, including storage, execution, and error handling. To facilitate this comparison, we will introduce a benchmark smart contract designed to measure gas consumption across different languages and programming patterns. This standardized contract will serve as the basis for assessing the relative gas costs and efficiency of each language in Ethereum environments.
+
+#### 3.3.1. Defining Gas Benchmark Smart Contract
+
+To facilitate an objective gas efficiency comparison, the same smart contract will be written, compiled, deployed, and benchmarked in each of the selected programming languages. The contract chosen for this purpose is the ERC20 token, a standardized contract widely used for creating fungible tokens on the Ethereum network.
+
+The ERC20 standard defines a set of common functions and events that allow token holders to transfer assets, check balances, and approve other users to spend tokens on their behalf. ERC20 tokens are extremely popular in the blockchain ecosystem, with thousands of implementations used for various decentralized applications, including decentralized finance (DeFi), initial coin offerings (ICOs), and more.
+
+Given its simplicity and broad adoption, the ERC20 token contract serves as an ideal benchmark for assessing gas consumption across different languages. Its standardized functions, such as `transfer()`, `approve()`, and `transferFrom()`, offer a consistent basis for measuring the gas costs associated with executing common blockchain operations. By applying the same contract across various languages, the comparison remains focused on language performance and optimization rather than contract complexity.
+
+The benchmarking process will provide insight into how well each language handles the execution of typical smart contract functions while managing gas consumption effectively.
+
+#### 3.3.2. Gas comparison criteria
+
+In order to effectively compare the gas efficiency of programming languages, several key criteria must be added. These criteria focus on both the gas costs associated with core operations in the ERC20 token contract and the overall efficiency of the bytecode generated by each language. The selected criteria are designed to evaluate how each language optimizes for typical contract interactions and affects gas consumption.
+
+##### 3.3.2.1. Bytecode Size
+
+Bytecode size refers to the size of the compiled contract code that is deployed to the Ethereum blockchain. The size of the bytecode impacts deployment costs, as larger contracts require more gas to be deployed. Efficient compilation leads to smaller bytecode, which can significantly reduce deployment gas fees. Each language will be assessed based on how compact and optimized its bytecode is after compilation.
+
+##### 3.3.2.2. Gas Used for transfer()
+
+The transfer() function is one of the core operations of the ERC20 token contract, allowing token holders to send tokens to another address. Gas consumption for this function reflects how efficiently the language handles standard token transfers, which are one of the most common operations in tokenized applications. Comparing the gas used for transfer() in different languages provides insight into how well each language optimizes for simple state changes in a contract.
+
+##### 3.3.2.3. Gas Used for approve()
+
+The approve() function allows a token holder to authorize a third party (typically another contract) to spend tokens on their behalf. This is crucial for enabling decentralized finance (DeFi) operations, where contracts need to interact with tokens on behalf of users. The gas used for approve() reflects the efficiency of managing allowances and permissions within the contract. Measuring this operation helps to assess how well the language manages gas consumption for security-sensitive operations like permission delegation.
+
+##### 3.3.2.4. Gas Used for transferFrom()
+
+The transferFrom() function allows a third party, once approved, to transfer tokens on behalf of the token holder. This is a more complex operation than transfer(), as it involves both authorization checks and token transfers. Measuring gas consumption for this function reveals how efficiently each language handles multi-step operations and contract logic that involves checks, updates, and state modifications. It also provides a clearer understanding of how the language optimizes more intricate contract interactions.
+
+By evaluating these criteria, a comprehensive comparison of the gas efficiency of each language can be established, providing insight into the strengths and weaknesses of each language in terms of execution cost and bytecode optimization.
+
+#### 3.3.3. Developing the Smart Contract
+
+**Solidity**. In developing the ERC20 token contract using Solidity, the primary focus is to implement the ERC20 standard without relying on assembly-level optimizations, such as the `assembly` keyword, which would shift the responsibility of optimization to a lower-level language like Yul. Instead, the contract is following Solidity’s high-level syntax and use its built-in gas optimization mechanisms.
+
+https://eips.ethereum.org/EIPS/eip-20
+
+For this comparison, the contract is built using the OpenZeppelin ERC20 implementation, a well-established and extensively tested library. OpenZeppelin’s ERC20 contracts are widely used across the Ethereum ecosystem for their robustness, security, and gas efficiency. The OpenZeppelin contracts have been rigorously audited and optimized for real-world deployments, making them a suitable choice for a gas comparison benchmark. By leveraging OpenZeppelin, the contract remains aligned with best practices in Ethereum development while offering competitive gas consumption.
+
+In Solidity, the ERC20 token contract is written to adhere strictly to the ERC20 standard, using high-level constructs to ensure clarity and maintainability.
+
+https://github.com/OpenZeppelin/openzeppelin-contracts/blob/c01a0fa27fb2d1546958be5d2cbbdd3fb565e4fa/contracts/token/ERC20/ERC20.sol
+
+**Vyper**. In Vyper, the ERC20 token contract is based on the example provided by the Vyper language developers. Vyper emphasizes simplicity and security, aiming to reduce potential attack surfaces through a restrictive feature set compared to Solidity. The ERC20 implementation in Vyper follows the standard token interface but avoids the use of complex features such as function overloading or inheritance, which are available in Solidity but omitted in Vyper for safety and simplicity reasons.
+
+The contract used for this comparison is taken from official Vyper documentation, ensuring that it follows the language’s best practices for gas efficiency and security. This approach highlights how Vyper, with its minimalist design, handles the ERC20 standard and its impact on gas consumption in comparison to Solidity.
+
+https://github.com/vyperlang/vyper/blob/9a208a6950900fa3184ef381e84d4d675c68cc97/examples/tokens/ERC20.vy
+
+**Yul**. Yul is an intermediate language that can be compiled to bytecode for different backends. It can be used in stand-alone mode and for “inline assembly” inside Solidity. The compiler uses Yul as an intermediate language in the IR-based code generator (“new codegen” or “IR-based codegen”). Yul is a good target for high-level optimisation stages that can benefit all target platforms equally.
+
+The ERC20 token contract in Yul is written to leverage the language’s low-level capabilities and fine-grained control over gas optimization. The contract is designed to showcase how Yul handles complex operations and state changes efficiently, focusing on gas efficiency and bytecode optimization.
+
+The whole contract code is an "object" with 2 parts: "code" and "object "runtime"". The "code" part is the initialization code that is executed once when the contract is deployed. The "object "runtime"" part is the code that is executed when the contract is called.
+
+It is worth noting that in Yul implementation of the ERC20 token contract, the function selector method from Solidity [TODO: solidity docs link] is used to determine the code to execute. This is done to ensure that the contract is compatible with modern blockchain interaction libraries, which all use the Solidity function selectors as an implicit standard.
+
+More precisely, the first runtime part code is a switch statement that checks the function selector and calls the corresponding function.
+
+```yul
+// Dispatcher
+switch selector()
+case 0x70a08231 /* "balanceOf(address)" */ {
+    returnUint(balanceOf(decodeAsAddress(0)))
+}
+case 0x18160ddd /* "totalSupply()" */ {
+    returnUint(totalSupply())
+}
+case 0xa9059cbb /* "transfer(address,uint256)" */ {
+    transfer(decodeAsAddress(0), decodeAsUint(1))
+    returnTrue()
+}
+case 0x23b872dd /* "transferFrom(address,address,uint256)" */ {
+    transferFrom(decodeAsAddress(0), decodeAsAddress(1), decodeAsUint(2))
+    returnTrue()
+}
+case 0x095ea7b3 /* "approve(address,uint256)" */ {
+    approve(decodeAsAddress(0), decodeAsUint(1))
+    returnTrue()
+}
+case 0xdd62ed3e /* "allowance(address,address)" */ {
+    returnUint(allowance(decodeAsAddress(0), decodeAsAddress(1)))
+}
+case 0x40c10f19 /* "mint(address,uint256)" */ {
+    mint(decodeAsAddress(0), decodeAsUint(1))
+    returnTrue()
+}
+default {
+    revert(0, 0)
+}
+```
+
+For more readability, the Yul code is divided into functions with the same name as in ERC20 standard.
+
+It is also worth noting that event hashes are also precalculated from the ERC and stored as constants in the contract.
+
+https://github.com/pynchmeister/yul-greatest-hits/blob/main/contracts/ERC20/ERC20.yul
+
+**Yulp**. Yul+ is an extension of Yul that builds on its low-level capabilities, introducing enhanced features for more complex contracts while maintaining gas efficiency. Yul+ preserves the modularity and flexibility of Yul but adds constructs for more readable and maintainable code.
+
+Similarly to Yul, the whole contract code is an "object" with same 2 parts. The first runtime part code is a switch statement as well, however "case" statements are more readable. This is because function as well as event selectors are calculated with a built-in function "sig":
+
+```yulp
+case sig"transfer(address owner, uint256 amount) returns (bool success)" {...}
+case sig"approve(address destination, uint256 amount) returns (bool success)" {...}
+topic"event Transfer(address indexed source, address indexed destination, uint amount)"
+```
+
+https://github.com/pynchmeister/yul-greatest-hits/blob/main/contracts/ERC20/ERC20.yulp
+
+**Fe**. Fe is a high-level language designed for the Ethereum ecosystem, focusing on gas efficiency and ease of use for developers familiar with Python-like syntax. It offers a simpler, more approachable alternative to Solidity and Vyper while maintaining efficient low-level operations.
+
+The ERC20 token contract in Fe differentiates itself from Solidity, Vyper, and Yul in several key ways. Unlike Solidity and Vyper, which offer more general-purpose programming paradigms, Fe structures its code in a minimalistic and Pythonic style, focusing on conciseness. Fe's built-in type system, such as u256 and String<100>, provides stricter constraints, which ensures better memory handling and optimization for Ethereum.
+
+Additionally, Fe does not use inline assembly or low-level function dispatching like Yul. Instead, it directly supports structured data types, such as Map, which facilitates more readable state management without resorting to lower-level abstractions. Events are defined using structured data, offering indexed fields like Solidity, but Fe syntax allows for more explicit type control.
+
+Unlike Yul and Yul+, Fe stands out with its clear separation of pub and internal functions, enhancing modularity while remaining more gas-efficient and optimized than Solidity's high-level structure, with lower cognitive overhead compared to Vyper’s more verbose approach.
+
+```fe
+ pub fn transferFrom(mut self, mut ctx: Context, sender: address, recipient: address, value: u256) -> bool {
+    assert self._allowances[sender][ctx.msg_sender()] >= value
+    self._transfer(ctx, sender, recipient, value)
+    self._approve(ctx, owner: sender, spender: ctx.msg_sender(), value: self._allowances[sender][ctx.msg_sender()] - value)
+    return true
+}
+```
+
+https://github.com/ethereum/fe/blob/master/crates/test-files/fixtures/demos/erc20_token.fe
+
+#### 3.3.4. Compiling the Smart Contract
+
+The newest version of each compiler is used to account for the latest optimizations and improvements.
+
+The contract is compiled using the Solidity compiler’s default settings, without enabling any non-standard compiler optimizations. This approach provides a solid baseline for assessing Solidity's gas performance compared to other languages, focusing on the gas efficiency achieved purely through Solidity’s high-level capabilities.
+
+#### 3.3.5. Benchmarking the resulting bytecode
+
+### 3.4. Comparison results
 
 ## Conclusions
 
