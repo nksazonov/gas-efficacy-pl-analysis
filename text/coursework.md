@@ -1588,11 +1588,80 @@ For this comparison, the contract is built using the OpenZeppelin ERC20 implemen
 
 In Solidity, the ERC20 token contract is written to adhere strictly to the ERC20 standard, using high-level constructs to ensure clarity and maintainability.
 
+This code displays the most advanced features of Solidity, namely:
+
+- Inheritance
+- Function and variable visibility types
+- Virtualization
+- Custom revert errors
+
+```solidity
+abstract contract ERC20 is Context, IERC20, IERC20Metadata, IERC20Errors {
+  mapping(address account => uint256) private _balances;
+
+  mapping(address account => mapping(address spender => uint256)) private _allowances;
+
+  uint256 private _totalSupply;
+
+  string private _name;
+  string private _symbol;
+
+  function balanceOf(address account) public view virtual returns (uint256) {
+    return _balances[account];
+  }
+
+  function _transfer(address from, address to, uint256 value) internal {
+    if (from == address(0)) {
+        revert ERC20InvalidSender(address(0));
+    }
+    if (to == address(0)) {
+        revert ERC20InvalidReceiver(address(0));
+    }
+    _update(from, to, value);
+  }
+```
+
 https://github.com/OpenZeppelin/openzeppelin-contracts/blob/c01a0fa27fb2d1546958be5d2cbbdd3fb565e4fa/contracts/token/ERC20/ERC20.sol
 
 **Vyper**. In Vyper, the ERC20 token contract is based on the example provided by the Vyper language developers. Vyper emphasizes simplicity and security, aiming to reduce potential attack surfaces through a restrictive feature set compared to Solidity. The ERC20 implementation in Vyper follows the standard token interface but avoids the use of complex features such as function overloading or inheritance, which are available in Solidity but omitted in Vyper for safety and simplicity reasons.
 
 The contract used for this comparison is taken from official Vyper documentation, ensuring that it follows the language’s best practices for gas efficiency and security. This approach highlights how Vyper, with its minimalist design, handles the ERC20 standard and its impact on gas consumption in comparison to Solidity.
+
+The Vyper contract is not represented by an object, but rather the whole file contains top-level definitions of functions and state variables.
+
+```vyper
+from ethereum.ercs import IERC20
+from ethereum.ercs import IERC20Detailed
+
+implements: IERC20
+implements: IERC20Detailed
+
+name: public(String[32])
+symbol: public(String[32])
+decimals: public(uint8)
+
+@external
+def transfer(_to : address, _value : uint256) -> bool:
+  ...
+```
+
+An acute reader also could notice that Vyper has function visibility types and nat spec documentation.
+
+```vyper
+@external
+def burnFrom(_to: address, _value: uint256):
+  """
+  @dev Burn an amount of the token from a given account.
+  @param _to The account whose tokens will be burned.
+  @param _value The amount that will be burned.
+  """
+  self.allowance[_to][msg.sender] -= _value
+  self._burn(_to, _value)
+
+@internal
+def _burn(_to: address, _value: uint256):
+  ...
+```
 
 https://github.com/vyperlang/vyper/blob/9a208a6950900fa3184ef381e84d4d675c68cc97/examples/tokens/ERC20.vy
 
