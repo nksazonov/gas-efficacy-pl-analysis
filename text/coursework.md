@@ -1548,13 +1548,34 @@ This section defines the criteria for comparing the gas efficiency of programmin
 
 #### 3.3.1. Defining Gas Benchmark Smart Contract
 
-To facilitate an objective gas efficiency comparison, the same smart contract will be written, compiled, deployed, and benchmarked in each of the selected programming languages. The contract chosen for this purpose is the ERC20 token, a standardized contract widely used for creating fungible tokens on the Ethereum network.
+To facilitate an objective gas efficiency comparison, the same smart contract is be written, compiled, deployed, and benchmarked in each of the selected programming languages. The contract chosen for this purpose is the ERC20 token, a standardized contract widely used for creating fungible tokens on the Ethereum network.
+
+https://eips.ethereum.org/EIPS/eip-20
 
 The ERC20 standard defines a set of common functions and events that allow token holders to transfer assets, check balances, and approve other users to spend tokens on their behalf. ERC20 tokens are extremely popular in the blockchain ecosystem, with thousands of implementations used for various decentralized applications, including decentralized finance (DeFi), initial coin offerings (ICOs), and more.
 
 Given its simplicity and broad adoption, the ERC20 token contract serves as an ideal benchmark for assessing gas consumption across different languages. Its standardized functions, such as `transfer()`, `approve()`, and `transferFrom()`, offer a consistent basis for measuring the gas costs associated with executing common blockchain operations. By applying the same contract across various languages, the comparison remains focused on language performance and optimization rather than contract complexity.
 
-The benchmarking process will provide insight into how well each language handles the execution of typical smart contract functions while managing gas consumption effectively.
+It is worth noting that the logic and parameters of the constructor function are not described by the standard, which has led to several logical variations of the ERC20 token contract:
+
+- Mintable supply - deploying without minting any tokens, only owner of the contract can mint tokens later.
+- Preminting supply - deploying with minting all tokens to the deployer / specified address.
+- Preminting amount and mintable - deploying with minting only a specified amount of tokens to the deployer / specified address. Owner can mint more tokens later.
+- Customizable token - an ability to specify the name, symbol, and decimals of the token.
+
+The latter is the most common practice due to its flexibility and ability to customize the token contract according to specific requirements.
+The preminting supply is also common, especially in ICOs and token sales, where all tokens are minted at the contract deployment, i.e. "fire and forget" approach.
+
+Another common extension of the standard is a so called "Capped" token, which limits the total supply of tokens that can be minted. This is often used in ICOs to ensure that the total supply is fixed and cannot be increased beyond a certain limit.
+This is done by adding a `cap` variable, a congnominal getter function and a check in the `mint` function to ensure that the total supply does not exceed the cap.
+
+Therefore, it would be logical to use these common practises in the benchmark ERC20 token contract to ensure that the comparison is relevant and reflects real-world scenarios.
+
+Finalizing, the benchmark contract implements ERC20 standard with the following features:
+
+- Customizable token name, symbol, and decimals.
+- Preminting supply of tokens to the deployer.
+- Capped supply of tokens.
 
 #### 3.3.2. Gas comparison criteria
 
@@ -1622,10 +1643,10 @@ abstract contract ERC20 is Context, IERC20, IERC20Metadata, IERC20Errors {
 ```
 
 https://github.com/OpenZeppelin/openzeppelin-contracts/blob/c01a0fa27fb2d1546958be5d2cbbdd3fb565e4fa/contracts/token/ERC20/ERC20.sol
+https://github.com/OpenZeppelin/openzeppelin-contracts/blob/c01a0fa27fb2d1546958be5d2cbbdd3fb565e4fa/contracts/token/ERC20/extensions/ERC20Capped.sol
 
-**Vyper**. In Vyper, the ERC20 token contract is based on the example provided by the Vyper language developers. Vyper emphasizes simplicity and security, aiming to reduce potential attack surfaces through a restrictive feature set compared to Solidity. The ERC20 implementation in Vyper follows the standard token interface but avoids the use of complex features such as function overloading or inheritance, which are available in Solidity but omitted in Vyper for safety and simplicity reasons.
-
-The contract used for this comparison is taken from official Vyper documentation, ensuring that it follows the language’s best practices for gas efficiency and security. This approach highlights how Vyper, with its minimalist design, handles the ERC20 standard and its impact on gas consumption in comparison to Solidity.
+**Vyper**. In Vyper, the ERC20 token contract is based on the example provided by the Vyper language developers, with slight modifications to add the cap and premint supply features, ensuring that it follows the language’s best practices for gas efficiency and security. This approach highlights how Vyper, with its minimalist design, handles the ERC20 standard and its impact on gas consumption in comparison to Solidity.
+Vyper emphasizes simplicity and security, aiming to reduce potential attack surfaces through a restrictive feature set compared to Solidity. The ERC20 implementation in Vyper follows the standard token interface but avoids the use of complex features such as function overloading or inheritance, which are available in Solidity but omitted in Vyper for safety and simplicity reasons.
 
 The Vyper contract is not represented by an object, but rather the whole file contains top-level definitions of functions and state variables.
 
@@ -1667,7 +1688,7 @@ https://github.com/vyperlang/vyper/blob/9a208a6950900fa3184ef381e84d4d675c68cc97
 
 **Yul**. Yul is an intermediate language that can be compiled to bytecode for different backends. It can be used in stand-alone mode and for “inline assembly” inside Solidity. The compiler uses Yul as an intermediate language in the IR-based code generator (“new codegen” or “IR-based codegen”). Yul is a good target for high-level optimisation stages that can benefit all target platforms equally.
 
-The ERC20 token contract in Yul is written to leverage the language’s low-level capabilities and fine-grained control over gas optimization. The contract is designed to showcase how Yul handles complex operations and state changes efficiently, focusing on gas efficiency and bytecode optimization.
+The ERC20 contract code is Yul is highly inspired by the Solidity documentation example in Yul section, however modified to incorporate the cap and premint supply features. The contract is written in a low-level, assembly-like syntax, focusing on gas efficiency and direct interaction with the Ethereum Virtual Machine (EVM). The Yul implementation of the ERC20 token contract demonstrates how developers can optimize for gas consumption by leveraging low-level operations and direct memory management.
 
 The whole contract code is an "object" with 2 parts: "code" and "object "runtime"". The "code" part is the initialization code that is executed once when the contract is deployed. The "object "runtime"" part is the code that is executed when the contract is called.
 
@@ -1747,9 +1768,166 @@ https://github.com/ethereum/fe/blob/master/crates/test-files/fixtures/demos/erc2
 
 #### 3.3.4. Compiling the Smart Contract
 
-The newest version of each compiler is used to account for the latest optimizations and improvements.
+Before the contracts can be benchmarked for gas efficiency, they must be compiled into bytecode for deployment on the Ethereum network. Each language has its own compiler and optimization settings that affect the resulting bytecode’s gas efficiency. The compilation process is crucial for assessing how well each language optimizes code and manages gas consumption. Note, that the newest version of each compiler is used to account for the latest optimizations and improvements.
 
-The contract is compiled using the Solidity compiler’s default settings, without enabling any non-standard compiler optimizations. This approach provides a solid baseline for assessing Solidity's gas performance compared to other languages, focusing on the gas efficiency achieved purely through Solidity’s high-level capabilities.
+**Solidity**. The Solidity contract is compiled using solc, the Solidity compiler, several times to generate different outputs for comparison.
+
+The compiler can be installed using several methods, including npm, Docker, apt-get, brew, or built from source. https://docs.soliditylang.org/en/v0.8.27/installing-solidity.html
+
+An acute reader may realize that during a prolonged and frequent development, the same project can use several compiler versions to incorporate for more new feature, optimizations and bug fixes. However, it may be inconvenient to reinstall the compiler each time. In this case, it may be useful to use a "solc-select" CLI tool, that allows to install and switch between different versions of the Solidity compiler. https://github.com/crytic/solc-select
+
+To compile the ERC20 token contract in Solidity without optimizations and save it to the `compiled/solidity/ERC20_no_opt.bin` file, the following command is used:
+
+```bash
+solc --combined-json bin ./code/solidity/ERC20.sol | jq -r '.contracts["code/solidity/ERC20.sol:ERC20"].bin' > code/compiled/solidity/ERC20_no_opt.bin
+```
+
+Solc provides the following optimizer options:
+
+```bash
+--via-ir             Turn on compilation mode via the IR.
+--optimize           Enable optimizer.
+--optimize-runs n (=200)
+                      The number of runs specifies roughly how often each
+                      opcode of the deployed code will be executed across the
+                      lifetime of the contract. Lower values will optimize
+                      more for initial deployment cost, higher values will
+                      optimize more for high-frequency usage.
+--optimize-yul       Enable Yul optimizer (independently of the EVM assembly
+                      optimizer). The general --optimize option automatically
+                      enables this unless --no-optimize-yul is specified.
+--no-optimize-yul    Disable Yul optimizer (independently of the EVM assembly
+                      optimizer).
+--yul-optimizations steps
+                      Forces Yul optimizer to use the specified sequence of
+                      optimization steps instead of the built-in one.
+```
+
+TODO: link to solidity docs
+
+The intermediate representation (IR) is a representation of the contract that is used by the Solidity compiler to optimize the code. The IR is a lower-level Yul representation of the contract that allows the compiler to perform more advanced optimizations than the high-level Solidity code. By enabling the IR mode, developers can achieve better gas efficiency and performance in their contracts.
+
+To compile in the IR mode, the `--via-ir` flag is used:
+
+```bash
+solc --via-ir --optimize --optimize-runs 200 --combined-json bin ./code/solidity/ERC20.sol | jq -r '.contracts["code/solidity/ERC20.sol:ERC20"].bin' > code/compiled/solidity/ERC20_ir.bin
+```
+
+The `--optimize` flag enables the optimizer, which performs various optimizations on the contract code to reduce gas consumption and improve performance. The `--optimize-runs` flag specifies the number of runs each function is expected to be used, affecting the level of optimization applied. Lower values optimize for initial deployment cost, while higher values optimize for high-frequency usage.
+
+To compile the contract with the optimizer enabled and set to 100000 runs, the following command is used:
+
+```bash
+solc --optimize --optimize-runs 100000 --combined-json bin ./code/solidity/ERC20.sol | jq -r '.contracts["code/solidity/ERC20.sol:ERC20"].bin' > code/compiled/solidity/ERC20_opt.bin
+```
+
+**Vyper**. The Vyper contract is compiled using the vyper compiler and different optimization modes are used: "none", "codesize" and "gas". Each of them is used to evaluate the impact on gas efficiency.
+
+The compiler can be installed using several methods, including pip, Docker or nix. https://docs.vyperlang.org/en/stable/installing-vyper.html
+
+To compile the ERC20 token contract in Vyper without optimizations and save it to the `compiled/vyper/ERC20_no_opt.bytecode` file, the following command is used:
+
+```bash
+vyper ./code/vyper/ERC20.vy --no-optimize > code/compiled/vyper/ERC20_no_opt.bin
+```
+
+The Vyper CLI tool accepts the following optimization modes: "none", "codesize", or "gas" (default).
+
+In a gas optimization mode, the compiler will try to generate bytecode which minimizes gas (up to a point), including:
+
+- using a sparse selector table which optimizes for gas over codesize
+- inlining some constants, and
+- trying to unroll some loops, especially for data copies.
+
+To compile the contract with gas optimization enabled, the following command is used:
+
+```bash
+vyper ./code/vyper/ERC20.vy > code/compiled/vyper/ERC20_opt_gas.bin
+```
+
+In codesize optimized mode, the compiler will try hard to minimize codesize by:
+
+- using a dense selector table
+- out-lining code, and
+- using more loops for data copies.
+
+To compile the contract with codesize optimization enabled, the following command is used:
+
+```bash
+vyper ./code/vyper/ERC20.vy --optimize codesize > code/compiled/vyper/ERC20_opt_codesize.bin
+```
+
+**Yul**. The Yul contract is compiled using the solc compiler as it has a built-in Yul compiler. There is no standalone Yul compiler as of time of writing.
+
+The contract is compiled with and without optimizations to evaluate the impact on gas efficiency.
+
+To compile the ERC20 token contract in Yul without optimizations and save it to the `compiled/yul/ERC20.yul` file, the following command is used:
+
+```bash
+solc --strict-assembly --bin code/yul/ERC20.yul | grep -A 1 "Binary representation:" | tail -n 1 > code/compiled/yul/ERC20_no_opt.bin
+```
+
+We had to resert to using `grep` and `tail` to extract the bytecode from the compiler output, as the output of the compilation is a string, that includes the purposeless "Binary representation:" and "=========" parts.
+
+To compile the contract with optimizations enabled, the following command is used:
+
+```bash
+solc --strict-assembly --optimize --bin code/yul/ERC20.yul | grep -A 1 "Binary representation:" | tail -n 1 > code/compiled/yul/ERC20_opt.bin
+```
+
+The default optimization runs is 200, however, it can be changed with the `--optimize-runs` flag. Nevertheless, compiling with higher number of runs produces the same bytecode in our case, therefore this compilation option is not compared.
+
+TODO: make yul ERC20 compatible to what's described in the previous section
+
+Yul string returns: https://github.com/pynchmeister/yul-greatest-hits/blob/main/contracts/ERC721/ERC721.yul
+Yul constructor, strings copy and return: https://github.com/Aboudjem/Yul-ERC20-assembly/blob/dev/src/YulERC20.sol
+
+**Yulp**. TODO:
+
+**Fe**. The Fe compiler can be installed using brew, downloaded directly from the GitHub releases page, or built from source. The compiler is compatible with MacOS and Linux, also it is possible to run it on Windows using WSL.
+
+Fe compiler also includes optimizer options:
+
+```bash
+--optimize <OPTIMIZE>
+```
+
+where `<OPTIMIZE>` can be set to true of false.
+
+It is worth noting that there is no ability to output the resulting bytecode to stdout, and the output is forcefully saved to `<output_dir>/<contract_name>/<contract_name>.bin`, making it impossible to change the outer directory of the binary file.
+
+To compile the ERC20 token contract in Fe without optimizations, the following command is used:
+
+```bash
+fe build --optimize false -e bytecode ./code/fe/ERC20.fe -o ./code/compiled/fe
+```
+
+However, this produces an error:
+
+```bash
+Error: Internal exception in StandardCompiler::compile: /solidity/libyul/backends/evm/EVMObjectCompiler.cpp(126): Throw in function run
+Dynamic exception type: boost::wrapexcept<solidity::yul::StackTooDeepError>
+std::exception::what: Variable $value is 4 slot(s) too deep inside the stack. Stack too deep. Try compiling with `--via-ir` (cli) or the equivalent `viaIR: true` (standard JSON) while enabling the optimizer. Otherwise, try removing local variables.
+[solidity::util::tag_comment*] = Variable $value is 4 slot(s) too deep inside the stack. Stack too deep. Try compiling with `--via-ir` (cli) or the equivalent `viaIR: true` (standard JSON) while enabling the optimizer. Otherwise, try removing local variables.
+
+thread 'main' panicked at crates/driver/src/lib.rs:356:13:
+Yul compilation failed with the above errors
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+You've hit an internal compiler error. This is a bug in the Fe compiler.
+Fe is still under heavy development, and isn't yet ready for production use.
+
+If you would, please report this bug at the following URL:
+https://github.com/ethereum/fe/issues/new
+```
+
+which suggests that an internal error has occurred, and the compiler is not yet ready for production use.
+
+However, compiling with optimizations enabled produces the bytecode:
+
+```bash
+fe build -o ./code/compiled/fe -e bytecode ./code/fe/ERC20.fe
+```
 
 #### 3.3.5. Benchmarking the resulting bytecode
 
