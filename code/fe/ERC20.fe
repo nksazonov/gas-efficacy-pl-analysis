@@ -18,15 +18,17 @@ contract ERC20 {
     _balances: Map<address, u256>
     _allowances: Map<address, Map<address, u256>>
     _total_supply: u256
+    _cap: u256
     _name: String<100>
     _symbol: String<100>
     _decimals: u8
 
-    pub fn __init__(mut self, mut ctx: Context, name: String<100>, symbol: String<100>) {
+    pub fn __init__(mut self, mut ctx: Context, name: String<100>, symbol: String<100>, decimals: u8, cap: u256, beneficiary: address) {
         self._name = name
         self._symbol = symbol
-        self._decimals = u8(18)
-        self._mint(ctx, account: ctx.msg_sender(), value: 1000_000_000_000_000_000_000_000)
+        self._decimals = decimals
+        self._cap = cap
+        self._mint(ctx, account: beneficiary, value: cap)
     }
 
     pub fn name(self) -> String<100> {
@@ -43,6 +45,10 @@ contract ERC20 {
 
     pub fn totalSupply(self) -> u256 {
         return self._total_supply
+    }
+
+    pub fn cap(self) -> u256 {
+        return self._cap
     }
 
     pub fn balanceOf(self, _ account: address) -> u256 {
