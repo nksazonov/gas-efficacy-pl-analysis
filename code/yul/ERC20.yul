@@ -1,17 +1,116 @@
 object "Token" {
     code {
-        /* -------- storage layout ---------- */
+        /* -------- STORAGE LAYOUT ---------- */
         function ownerPos() -> p { p := 0 }
         function totalSupplyPos() -> p { p := 1 }
         function namePos() -> p { p := 2 }
         function symbolPos() -> p { p := 3 }
-        function decimals() -> p { p := 4 }
+        function decimalsPos() -> p { p := 4 }
         function capPos() -> p { p := 5 }
+
+        /* -------- HELPERS -------- */
+
+        function round_up_to_mul_of_32(value) -> result {
+            result := and(add(value, 31), not(31))
+        }
+
+        function allocate_memory(size) -> memPtr {
+            memPtr := mload(64)
+            let newFreePtr := add(memPtr, round_up_to_mul_of_32(size))
+            mstore(64, newFreePtr)
+        }
+
+        function abi_decode_string(headStart, headEnd) -> array_ptr {
+            let offset := add(headStart, mload(add(headStart, 0)))
+            let length := mload(offset)
+            // add length slot
+            let size := round_up_to_mul_of_32(length)
+            let array_alloc_size := add(size, 0x20)
+            array_ptr := allocate_memory(array_alloc_size)
+            mstore(array_ptr, length)
+            let src := add(offset, 0x20)
+            let dst := add(array_ptr, 0x20)
+            mcopy(dst, src, length)
+            mstore(add(dst, length), 0)
+        }
+
+        function extract_string_arg_to_memory() -> ptr {
+            let programSize := datasize("Token")
+            let argSize := sub(codesize(), programSize)
+
+            let memoryDataOffset := allocate_memory(argSize)
+            codecopy(memoryDataOffset, programSize, argSize)
+            ptr := abi_decode_string(memoryDataOffset, add(memoryDataOffset, argSize))
+        }
+
+        function extract_byte_array_length(data) -> length {
+            length := div(data, 2)
+            let outOfPlaceEncoding := and(data, 1)
+            if iszero(outOfPlaceEncoding) {
+                length := and(length, 0x7f)
+            }
+        }
+
+        function compute_array_data_storage_slot(ptr) -> slot {
+            slot := ptr
+            mstore(0, ptr)
+            slot := keccak256(0, 0x20)
+        }
+
+        function mask_bytes_dynamic(data, bytes) -> result {
+            let mask := not(shr(mul(8, bytes), not(0)))
+            result := and(data, mask)
+        }
+
+        function extract_used_part_and_set_length_of_short_byte_array(data, len) -> used {
+            // we want to save only elements that are part of the array after resizing
+            // others should be set to zero
+            data := mask_bytes_dynamic(data, len)
+            used := or(data, mul(2, len))
+        }
+
+        function store_string(slot, src) {
+            let newLen := mload(src)
+            let oldLen := extract_byte_array_length(sload(slot))
+
+            let srcOffset := 0x20
+
+            switch gt(newLen, 31)
+            // store long string to multiple slots
+            case 1 {
+                let loopEnd := and(newLen, not(0x1f))
+
+                let dstPtr := compute_array_data_storage_slot(slot)
+                let i := 0
+                for { } lt(i, loopEnd) { i := add(i, 0x20) } {
+                    sstore(dstPtr, mload(add(src, srcOffset)))
+                    dstPtr := add(dstPtr, 1)
+                    srcOffset := add(srcOffset, 32)
+                }
+                if lt(loopEnd, newLen) {
+                    let lastValue := mload(add(src, srcOffset))
+                    sstore(dstPtr, mask_bytes_dynamic(lastValue, and(newLen, 0x1f)))
+                }
+                sstore(slot, add(mul(newLen, 2), 1))
+            }
+            // store short string to one slot
+            default {
+                let value := 0
+                if newLen {
+                    value := mload(add(src, srcOffset))
+                }
+                sstore(slot, extract_used_part_and_set_length_of_short_byte_array(value, newLen))
+            }
+        }
+
+        /* -------- CONSTRUCTOR -------- */
+
+        mstore(64, memoryguard(128))
 
         // Store the creator in its slot
         sstore(ownerPos(), caller())
 
-        /* ---------- */
+        // Decode and Store CAP
         /*
         let programSize := datasize("Token")
         let argSize := sub(codesize(), programSize)
@@ -23,19 +122,24 @@ object "Token" {
         sstore(capPos(), cap)
         */
 
+        let name_ptr := extract_string_arg_to_memory()
+        store_string(namePos(), name_ptr)
+
         // Deploy the contract
         datacopy(0, dataoffset("runtime"), datasize("runtime"))
         return(0, datasize("runtime"))
     }
     object "runtime" {
         code {
+            mstore(64, memoryguard(128))
+
             // Protection against sending Ether
             require(iszero(callvalue()))
 
             // Dispatcher
             switch selector()
             case 0x06fdde03 /* "name()" */ {
-
+                returnString(name())
             }
             case 0x95d89b41 /* "symbol()" */ {
 
@@ -129,6 +233,22 @@ object "Token" {
             function returnTrue() {
                 returnUint(1)
             }
+            function returnString(s) {
+                let memPos := allocate_unbounded()
+                let memEnd := add(memPos, 32)
+                mstore(add(memPos, 0), sub(memEnd, memPos))
+
+                let length := mload(s)
+                mstore(memEnd, length)
+                memEnd := add(memEnd, 0x20)
+
+                mcopy(memEnd, add(s, 0x20), length)
+                mstore(add(memEnd, length), 0)
+
+                memEnd := add(memEnd, round_up_to_mul_of_32(length))
+
+                return(memPos, sub(memEnd, memPos))
+            }
 
             /* -------- events ---------- */
             function emitTransfer(from, to, amount) {
@@ -144,12 +264,32 @@ object "Token" {
                 log3(0, 0x20, signatureHash, indexed1, indexed2)
             }
 
+            /* -------- memory operations ---------- */
+            function round_up_to_mul_of_32(value) -> result {
+                result := and(add(value, 31), not(31))
+            }
+
+            function allocate_unbounded() -> memPtr {
+                memPtr := mload(64)
+            }
+
+            function finalize_allocation(memPtr, size) {
+                let newFreePtr := add(memPtr, round_up_to_mul_of_32(size))
+                mstore(64, newFreePtr)
+            }
+
+            function array_store_length_for_encoding(pos, length) -> updated_pos {
+                mstore(pos, length)
+                updated_pos := add(pos, 0x20)
+            }
+
+
             /* -------- storage layout ---------- */
             function ownerPos() -> p { p := 0 }
             function totalSupplyPos() -> p { p := 1 }
             function namePos() -> p { p := 2 }
             function symbolPos() -> p { p := 3 }
-            function decimals() -> p { p := 4 }
+            function decimalsPos() -> p { p := 4 }
             function capPos() -> p { p := 5 }
             function accountToStorageOffset(account) -> offset {
                 offset := add(0x1000, account)
@@ -162,11 +302,52 @@ object "Token" {
             }
 
             /* -------- storage access ---------- */
+            function extract_byte_array_length(data) -> length {
+                length := div(data, 2)
+                let outOfPlaceEncoding := and(data, 1)
+                if iszero(outOfPlaceEncoding) {
+                    length := and(length, 0x7f)
+                }
+            }
+
+            function array_data_slot(ptr) -> data {
+                data := ptr
+                mstore(0, ptr)
+                data := keccak256(0, 0x20)
+            }
+
+            function read_string_from_storage(slot) -> memPtr {
+                memPtr := allocate_unbounded()
+
+                let end := 0
+                let slotValue := sload(slot)
+                let length := extract_byte_array_length(slotValue)
+                let str_part_ptr := array_store_length_for_encoding(memPtr, length)
+                switch and(slotValue, 1)
+                case 0 {
+                    // short byte array
+                    mstore(str_part_ptr, and(slotValue, not(0xff)))
+                    end := add(str_part_ptr, mul(0x20, iszero(iszero(length))))
+                }
+                case 1 {
+                    // long byte array
+                    let dataPos := array_data_slot(slot)
+                    let i := 0
+                    for { } lt(i, length) { i := add(i, 0x20) } {
+                        mstore(add(str_part_ptr, i), sload(dataPos))
+                        dataPos := add(dataPos, 1)
+                    }
+                    end := add(str_part_ptr, i)
+                }
+
+                finalize_allocation(memPtr, sub(end, memPtr))
+            }
+
             function owner() -> o {
                 o := sload(ownerPos())
             }
             function name() -> n {
-                n := sload(namePos())
+                n := read_string_from_storage(namePos())
             }
             function symbol() -> s {
                 s := sload(symbolPos())
