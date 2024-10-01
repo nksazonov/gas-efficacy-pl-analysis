@@ -20,27 +20,46 @@ object "Token" {
             mstore(64, newFreePtr)
         }
 
-        function abi_decode_string(headStart, headEnd) -> array_ptr {
-            let offset := add(headStart, mload(add(headStart, 0)))
-            let length := mload(offset)
+        function array_alloc_size(length) -> size {
+            size := round_up_to_mul_of_32(length)
             // add length slot
-            let size := round_up_to_mul_of_32(length)
-            let array_alloc_size := add(size, 0x20)
-            array_ptr := allocate_memory(array_alloc_size)
-            mstore(array_ptr, length)
-            let src := add(offset, 0x20)
-            let dst := add(array_ptr, 0x20)
-            mcopy(dst, src, length)
+            size := add(size, 0x20)
+        }
+
+        function abi_decode_string(offset, end) -> array {
+            let length := mload(offset)
+            array := allocate_memory(array_alloc_size(length))
+            mstore(array, length)
+            let dst := add(array, 0x20)
+            // copy memory to memory with cleanup
+            mcopy(dst, add(offset, 0x20), length)
             mstore(add(dst, length), 0)
         }
 
-        function extract_string_arg_to_memory() -> ptr {
+        function abi_decode_constructor_args(headStart, dataEnd) -> name_ptr, symbol_ptr, decimals, cap, beneficiary {
+            let offset := mload(add(headStart, 0))
+            name_ptr := abi_decode_string(add(headStart, offset), dataEnd)
+
+            offset := mload(add(headStart, 32))
+            symbol_ptr := abi_decode_string(add(headStart, offset), dataEnd)
+
+            offset := 64
+            decimals := mload(add(headStart, offset))
+
+            offset := 96
+            cap := mload(add(headStart, offset))
+
+            offset := 128
+            beneficiary := mload(add(headStart, offset))
+        }
+
+        function extract_constructor_args() -> name_ptr, symbol_ptr, decimals, cap, beneficiary {
             let programSize := datasize("Token")
             let argSize := sub(codesize(), programSize)
 
             let memoryDataOffset := allocate_memory(argSize)
             codecopy(memoryDataOffset, programSize, argSize)
-            ptr := abi_decode_string(memoryDataOffset, add(memoryDataOffset, argSize))
+            name_ptr, symbol_ptr, decimals, cap, beneficiary := abi_decode_constructor_args(memoryDataOffset, add(memoryDataOffset, argSize))
         }
 
         function extract_byte_array_length(data) -> length {
@@ -104,26 +123,16 @@ object "Token" {
         }
 
         /* -------- CONSTRUCTOR -------- */
-
         mstore(64, memoryguard(128))
 
         // Store the creator in its slot
         sstore(ownerPos(), caller())
 
-        // Decode and Store CAP
-        /*
-        let programSize := datasize("Token")
-        let argSize := sub(codesize(), programSize)
-
-        let memoryDataOffset := mload(64)
-        codecopy(memoryDataOffset, programSize, argSize)
-        let cap := mload(memoryDataOffset)
-
-        sstore(capPos(), cap)
-        */
-
-        let name_ptr := extract_string_arg_to_memory()
+        let name_ptr, symbol_ptr, decimals, cap, beneficiary := extract_constructor_args()
         store_string(namePos(), name_ptr)
+        store_string(symbolPos(), symbol_ptr)
+        sstore(decimalsPos(), decimals)
+        sstore(capPos(), cap)
 
         // Deploy the contract
         datacopy(0, dataoffset("runtime"), datasize("runtime"))
@@ -142,10 +151,10 @@ object "Token" {
                 returnString(name())
             }
             case 0x95d89b41 /* "symbol()" */ {
-
+                returnString(symbol())
             }
             case 0x313ce567 /* "decimals()" */ {
-
+                returnUint(decimals())
             }
             case 0x355274ea /* "cap()" */ {
                 returnUint(cap())
@@ -350,7 +359,7 @@ object "Token" {
                 n := read_string_from_storage(namePos())
             }
             function symbol() -> s {
-                s := sload(symbolPos())
+                s := read_string_from_storage(symbolPos())
             }
             function decimals() -> d {
                 d := sload(decimalsPos())
