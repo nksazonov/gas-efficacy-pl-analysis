@@ -1,31 +1,29 @@
 object "Token" {
     code {
         /* -------- STORAGE LAYOUT ---------- */
-        function ownerPos() -> p { p := 0 }
-        function totalSupplyPos() -> p { p := 1 }
-        function namePos() -> p { p := 2 }
-        function symbolPos() -> p { p := 3 }
-        function decimalsPos() -> p { p := 4 }
-        function capPos() -> p { p := 5 }
+        function totalSupplyPos() -> p { p := 0 }
+        function namePos() -> p { p := 1 }
+        function symbolPos() -> p { p := 2 }
+        function decimalsPos() -> p { p := 3 }
+        function capPos() -> p { p := 4 }
+        function accountToStorageOffset(account) -> offset {
+            offset := add(0x1000, account)
+        }
 
         /* -------- HELPERS -------- */
-
         function round_up_to_mul_of_32(value) -> result {
             result := and(add(value, 31), not(31))
         }
-
         function allocate_memory(size) -> memPtr {
             memPtr := mload(64)
             let newFreePtr := add(memPtr, round_up_to_mul_of_32(size))
             mstore(64, newFreePtr)
         }
-
         function array_alloc_size(length) -> size {
             size := round_up_to_mul_of_32(length)
             // add length slot
             size := add(size, 0x20)
         }
-
         function abi_decode_string(offset, end) -> array {
             let length := mload(offset)
             array := allocate_memory(array_alloc_size(length))
@@ -35,7 +33,6 @@ object "Token" {
             mcopy(dst, add(offset, 0x20), length)
             mstore(add(dst, length), 0)
         }
-
         function abi_decode_constructor_args(headStart, dataEnd) -> name_ptr, symbol_ptr, decimals, cap, beneficiary {
             let offset := mload(add(headStart, 0))
             name_ptr := abi_decode_string(add(headStart, offset), dataEnd)
@@ -52,7 +49,6 @@ object "Token" {
             offset := 128
             beneficiary := mload(add(headStart, offset))
         }
-
         function extract_constructor_args() -> name_ptr, symbol_ptr, decimals, cap, beneficiary {
             let programSize := datasize("Token")
             let argSize := sub(codesize(), programSize)
@@ -61,7 +57,6 @@ object "Token" {
             codecopy(memoryDataOffset, programSize, argSize)
             name_ptr, symbol_ptr, decimals, cap, beneficiary := abi_decode_constructor_args(memoryDataOffset, add(memoryDataOffset, argSize))
         }
-
         function extract_byte_array_length(data) -> length {
             length := div(data, 2)
             let outOfPlaceEncoding := and(data, 1)
@@ -69,25 +64,21 @@ object "Token" {
                 length := and(length, 0x7f)
             }
         }
-
         function compute_array_data_storage_slot(ptr) -> slot {
             slot := ptr
             mstore(0, ptr)
             slot := keccak256(0, 0x20)
         }
-
         function mask_bytes_dynamic(data, bytes) -> result {
             let mask := not(shr(mul(8, bytes), not(0)))
             result := and(data, mask)
         }
-
         function extract_used_part_and_set_length_of_short_byte_array(data, len) -> used {
             // we want to save only elements that are part of the array after resizing
             // others should be set to zero
             data := mask_bytes_dynamic(data, len)
             used := or(data, mul(2, len))
         }
-
         function store_string(slot, src) {
             let newLen := mload(src)
             let oldLen := extract_byte_array_length(sload(slot))
@@ -122,17 +113,49 @@ object "Token" {
             }
         }
 
+        /* -------- UTILITY FUNCTIONS -------- */
+        function safeAdd(a, b) -> r {
+            r := add(a, b)
+            if or(lt(r, a), lt(r, b)) { revert(0, 0) }
+        }
+
+        /* -------- EVENTS -------- */
+        function emitTransfer(from, to, amount) {
+            let signatureHash := 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef
+            emitEvent(signatureHash, from, to, amount)
+        }
+        function emitEvent(signatureHash, indexed1, indexed2, nonIndexed) {
+            mstore(0, nonIndexed)
+            log3(0, 0x20, signatureHash, indexed1, indexed2)
+        }
+
+        /* -------- CONSTRUCTOR FUNCTIONS -------- */
+        function totalSupply() -> supply {
+            supply := sload(totalSupplyPos())
+        }
+        function mintTokens(amount) {
+            sstore(totalSupplyPos(), safeAdd(totalSupply(), amount))
+        }
+        function addToBalance(account, amount) {
+            let offset := accountToStorageOffset(account)
+            sstore(offset, safeAdd(sload(offset), amount))
+        }
+        function mint(account, amount) {
+            mintTokens(amount)
+            addToBalance(account, amount)
+            emitTransfer(0, account, amount)
+        }
+
         /* -------- CONSTRUCTOR -------- */
         mstore(64, memoryguard(128))
-
-        // Store the creator in its slot
-        sstore(ownerPos(), caller())
 
         let name_ptr, symbol_ptr, decimals, cap, beneficiary := extract_constructor_args()
         store_string(namePos(), name_ptr)
         store_string(symbolPos(), symbol_ptr)
         sstore(decimalsPos(), decimals)
         sstore(capPos(), cap)
+
+        mint(beneficiary, cap)
 
         // Deploy the contract
         datacopy(0, dataoffset("runtime"), datasize("runtime"))
@@ -180,21 +203,10 @@ object "Token" {
             case 0xdd62ed3e /* "allowance(address,address)" */ {
                 returnUint(allowance(decodeAsAddress(0), decodeAsAddress(1)))
             }
-            case 0x40c10f19 /* "mint(address,uint256)" */ {
-                mint(decodeAsAddress(0), decodeAsUint(1))
-                returnTrue()
-            }
             default {
                 revert(0, 0)
             }
 
-            function mint(account, amount) {
-                require(calledByOwner())
-
-                mintTokens(amount)
-                addToBalance(account, amount)
-                emitTransfer(0, account, amount)
-            }
             function transfer(to, amount) {
                 executeTransfer(caller(), to, amount)
             }
@@ -207,7 +219,6 @@ object "Token" {
                 decreaseAllowanceBy(from, caller(), amount)
                 executeTransfer(from, to, amount)
             }
-
             function executeTransfer(from, to, amount) {
                 revertIfZeroAddress(to)
                 deductFromBalance(from, amount)
@@ -220,7 +231,6 @@ object "Token" {
             function selector() -> s {
                 s := div(calldataload(0), 0x100000000000000000000000000000000000000000000000000000000)
             }
-
             function decodeAsAddress(offset) -> v {
                 v := decodeAsUint(offset)
                 if iszero(iszero(and(v, not(0xffffffffffffffffffffffffffffffffffffffff)))) {
@@ -277,16 +287,13 @@ object "Token" {
             function round_up_to_mul_of_32(value) -> result {
                 result := and(add(value, 31), not(31))
             }
-
             function allocate_unbounded() -> memPtr {
                 memPtr := mload(64)
             }
-
             function finalize_allocation(memPtr, size) {
                 let newFreePtr := add(memPtr, round_up_to_mul_of_32(size))
                 mstore(64, newFreePtr)
             }
-
             function array_store_length_for_encoding(pos, length) -> updated_pos {
                 mstore(pos, length)
                 updated_pos := add(pos, 0x20)
@@ -294,12 +301,11 @@ object "Token" {
 
 
             /* -------- storage layout ---------- */
-            function ownerPos() -> p { p := 0 }
-            function totalSupplyPos() -> p { p := 1 }
-            function namePos() -> p { p := 2 }
-            function symbolPos() -> p { p := 3 }
-            function decimalsPos() -> p { p := 4 }
-            function capPos() -> p { p := 5 }
+            function totalSupplyPos() -> p { p := 0 }
+            function namePos() -> p { p := 1 }
+            function symbolPos() -> p { p := 2 }
+            function decimalsPos() -> p { p := 3 }
+            function capPos() -> p { p := 4 }
             function accountToStorageOffset(account) -> offset {
                 offset := add(0x1000, account)
             }
@@ -318,13 +324,11 @@ object "Token" {
                     length := and(length, 0x7f)
                 }
             }
-
             function array_data_slot(ptr) -> data {
                 data := ptr
                 mstore(0, ptr)
                 data := keccak256(0, 0x20)
             }
-
             function read_string_from_storage(slot) -> memPtr {
                 memPtr := allocate_unbounded()
 
@@ -351,10 +355,6 @@ object "Token" {
 
                 finalize_allocation(memPtr, sub(end, memPtr))
             }
-
-            function owner() -> o {
-                o := sload(ownerPos())
-            }
             function name() -> n {
                 n := read_string_from_storage(namePos())
             }
@@ -369,9 +369,6 @@ object "Token" {
             }
             function cap() -> c {
                 c := sload(capPos())
-            }
-            function mintTokens(amount) {
-                sstore(totalSupplyPos(), safeAdd(totalSupply(), amount))
             }
             function balanceOf(account) -> bal {
                 bal := sload(accountToStorageOffset(account))
@@ -409,9 +406,6 @@ object "Token" {
             function safeAdd(a, b) -> r {
                 r := add(a, b)
                 if or(lt(r, a), lt(r, b)) { revert(0, 0) }
-            }
-            function calledByOwner() -> cbo {
-                cbo := eq(owner(), caller())
             }
             function revertIfZeroAddress(addr) {
                 require(addr)
