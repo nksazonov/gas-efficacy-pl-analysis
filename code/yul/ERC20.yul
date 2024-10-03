@@ -57,13 +57,6 @@ object "Token" {
             codecopy(memoryDataOffset, programSize, argSize)
             name_ptr, symbol_ptr, decimals, cap, beneficiary := abi_decode_constructor_args(memoryDataOffset, add(memoryDataOffset, argSize))
         }
-        function extract_byte_array_length(data) -> length {
-            length := div(data, 2)
-            let outOfPlaceEncoding := and(data, 1)
-            if iszero(outOfPlaceEncoding) {
-                length := and(length, 0x7f)
-            }
-        }
         function compute_array_data_storage_slot(ptr) -> slot {
             slot := ptr
             mstore(0, ptr)
@@ -81,8 +74,6 @@ object "Token" {
         }
         function store_string(slot, src) {
             let newLen := mload(src)
-            let oldLen := extract_byte_array_length(sload(slot))
-
             let srcOffset := 0x20
 
             switch gt(newLen, 31)
