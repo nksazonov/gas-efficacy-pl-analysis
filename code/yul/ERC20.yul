@@ -211,8 +211,11 @@ object "Token" {
                 executeTransfer(from, to, amount)
             }
             function executeTransfer(from, to, amount) {
-                revertIfZeroAddress(to)
                 deductFromBalance(from, amount)
+                if iszero(to) {
+                    // subtraction is safe as amount and from.balance are never > totalSupply
+                    sstore(totalSupplyPos(), sub(totalSupply(), amount))
+                }
                 addToBalance(to, amount)
                 emitTransfer(from, to, amount)
             }
