@@ -1,0 +1,360 @@
+object "Utils" {
+  code {
+    function round_up_to_mul_of_32(value) -> result {
+        result := and(add(value, 31), not(31))
+    }
+
+    function allocate_unbounded() -> _memPtr {
+        _memPtr := mload(64)
+    }
+
+    function finalize_allocation(_memPtr, size) {
+        let newFreePtr := add(_memPtr, round_up_to_mul_of_32(size))
+        mstore(64, newFreePtr)
+    }
+
+    function allocate_memory(size) -> _memPtr {
+        _memPtr := allocate_unbounded()
+        finalize_allocation(_memPtr, size)
+    }
+  }
+}
+
+object "ERC20" is "Utils" {
+  code {
+    // ---------- STORAGE LAYOUT ----------
+    enum Storage (
+      name,        // 0
+      symbol,      // 1
+      decimals,    // 2
+      totalSupply, // 3
+      balance,     // 4
+      allowance    // 5
+    )
+
+    // ---------- CONSTRUCTOR PARAMETERS ----------
+    mstruct ConstructorParameters(
+      name_offset: 32,
+      symbol_offset: 32,
+      decimals: 32,
+      cap: 32,
+      beneficiary: 32
+    )
+
+    mstruct StringLayout(
+      length: 32,
+      short_string: 32
+    )
+
+    /* -------- HELPERS -------- */
+    function array_alloc_size(length) -> size {
+        size := round_up_to_mul_of_32(length)
+        // add length slot
+        size := add(size, 0x20)
+    }
+    function abi_decode_string(offset, end) -> array {
+        let length := mload(offset)
+        array := allocate_memory(array_alloc_size(length))
+        mstore(array, length)
+        let dst := add(array, 0x20)
+        // copy memory to memory with cleanup
+        mcopy(dst, add(offset, 0x20), length)
+        mstore(add(dst, length), 0)
+    }
+    function abi_decode_constructor_args(headStart, dataEnd) -> name_ptr, symbol_ptr, decimals, cap, beneficiary {
+        name_ptr := abi_decode_string(add(headStart, ConstructorParameters.name_offset(headStart)), dataEnd)
+        symbol_ptr := abi_decode_string(add(headStart, ConstructorParameters.symbol_offset(headStart)), dataEnd)
+        decimals := ConstructorParameters.decimals(headStart)
+        cap := ConstructorParameters.cap(headStart)
+        beneficiary := ConstructorParameters.beneficiary(headStart)
+    }
+    function extract_constructor_args() -> name_ptr, symbol_ptr, decimals, cap, beneficiary {
+        let programSize := datasize("ERC20")
+        let argSize := sub(codesize(), programSize)
+
+        let memoryDataOffset := allocate_memory(argSize)
+        codecopy(memoryDataOffset, programSize, argSize)
+        name_ptr, symbol_ptr, decimals, cap, beneficiary := abi_decode_constructor_args(memoryDataOffset, add(memoryDataOffset, argSize))
+    }
+    function compute_array_data_storage_slot(ptr) -> slot {
+        slot := ptr
+        mstore(0, ptr)
+        slot := keccak256(0, 0x20)
+    }
+    function mask_bytes_dynamic(data, bytes) -> result {
+        let mask := not(shr(mul(8, bytes), not(0)))
+        result := and(data, mask)
+    }
+    function extract_used_part_and_set_length_of_short_byte_array(_data, len) -> used {
+        // we want to save only elements that are part of the array after resizing
+        // others should be set to zero
+        _data := mask_bytes_dynamic(_data, len)
+        used := or(_data, mul(2, len))
+    }
+    function store_string(slot, src) {
+        let length := StringLayout.length(src)
+        let srcOffset := 0x20
+
+        switch gt(length, 31)
+        // store long string to multiple slots
+        case 1 {
+            let loopEnd := and(length, not(0x1f))
+
+            let dstPtr := compute_array_data_storage_slot(slot)
+            let i := 0
+            for { } lt(i, loopEnd) { i := add(i, 0x20) } {
+                sstore(dstPtr, mload(add(src, srcOffset)))
+                dstPtr := add(dstPtr, 1)
+                srcOffset := add(srcOffset, 32)
+            }
+            if lt(loopEnd, length) {
+                let lastValue := mload(add(src, srcOffset))
+                sstore(dstPtr, mask_bytes_dynamic(lastValue, and(length, 0x1f)))
+            }
+            sstore(slot, add(mul(length, 2), 1))
+        }
+        // store short string to one slot
+        default {
+            let value := 0
+            if length {
+                value := StringLayout.short_string(src)
+            }
+            sstore(slot, extract_used_part_and_set_length_of_short_byte_array(value, length))
+        }
+    }
+
+    /* -------- CONSTRUCTOR -------- */
+    mstore(64, memoryguard(128))
+
+    let name_ptr, symbol_ptr, decimals, cap, beneficiary := extract_constructor_args()
+    store_string(Storage.name, name_ptr)
+    store_string(Storage.symbol, symbol_ptr)
+
+    sstore(Storage.decimals, decimals)
+    sstore(Storage.totalSupply, cap)
+
+    // set beneficiary balance at cap
+    mstore(0, beneficiary, Storage.balance)
+    sstore(keccak256(0, 64), cap)
+
+    // Deploy the contract
+    datacopy(0, dataoffset("Runtime"), datasize("Runtime"))
+    return(0, datasize("Runtime"))
+  }
+  object "Runtime" is "Utils" {
+    code {
+        const _calldata := 128 // leave first 4 32 byte chunks for hashing, returns etc..
+
+        enum Storage (
+          name,        // 0
+          symbol,      // 1
+          decimals,    // 2
+          totalSupply, // 3
+          balance,     // 4
+          allowance    // 5
+        )
+
+        calldatacopy(_calldata, 0, calldatasize()) // copy all calldata to memory
+
+        switch mslice(_calldata, 4) // 4 byte calldata signature
+
+        case sig"transfer(address owner, uint256 amount) returns (bool success)" {
+            mstruct transferCalldata(sig: 4, owner: 32, amount: 32)
+
+            executeTransfer(caller(),
+                transferCalldata.owner(_calldata),
+                transferCalldata.amount(_calldata))
+        }
+
+        case sig"transferFrom(address source, address destination, uint amount) returns (bool success)" {
+            mstruct transferFromCalldata(sig: 4, source: 32, destination: 32, amount: 32)
+
+            executeTransfer(transferFromCalldata.source(_calldata),
+                transferFromCalldata.destination(_calldata),
+                transferFromCalldata.amount(_calldata))
+        }
+
+        case sig"approve(address destination, uint256 amount) returns (bool success)" {
+            mstruct approveCalldata(sig: 4, destination: 32, amount: 32)
+
+            sstore(mappingStorageKey2(caller(),
+                approveCalldata.destination(_calldata),
+                Storage.allowance), approveCalldata.amount(_calldata))
+
+            mstore(0, approveCalldata.amount(_calldata))
+            log3(0, 32,
+                topic"event Approval(address indexed source, address indexed destination, uint256 amount)",
+                caller(),
+                approveCalldata.destination(_calldata))
+
+            returnTrue()
+        }
+
+        case sig"balanceOf(address owner) returns (uint256 balance)" {
+            mstruct balanceOfCalldata(sig: 4, owner: 32)
+            let bal := sload(mappingStorageKey(balanceOfCalldata.owner(_calldata), Storage.balance))
+            returnUint(bal)
+        }
+
+        case sig"allowance(address source, address owner) returns (uint256 allowance)" {
+            mstruct allowanceCalldata(sig: 4, source: 32, owner: 32)
+            let allowance := sload(
+                mappingStorageKey2(
+                    allowanceCalldata.source(_calldata),
+                    allowanceCalldata.owner(_calldata),
+                    Storage.allowance
+                )
+            )
+            returnUint(allowance)
+        }
+
+        case sig"name() returns (string)" {
+            let name := read_string_from_storage(Storage.name)
+            returnString(name)
+        }
+        case sig"symbol() returns (string)" {
+            let symbol := read_string_from_storage(Storage.symbol)
+            returnString(symbol)
+        }
+        case sig"decimals() returns (string)" {
+            let decimals := sload(Storage.decimals)
+            returnUint(decimals)
+        }
+        case sig"totalSupply() returns (string)" {
+            let totalSupply := sload(Storage.totalSupply)
+            returnUint(totalSupply)
+        }
+
+        default { require(0) } // invalid method signature
+
+        stop() // stop execution here..
+
+        function executeTransfer(source, destination, amount) {
+            let balanceOfSource := sload(mappingStorageKey(source, Storage.balance))
+            let allowanceOfDestination := sload(mappingStorageKey2(source, destination, Storage.balance))
+            let allowanceOfSourceSender := sload(mappingStorageKey2(source, caller(), Storage.allowance))
+
+            // require(balanceOf[src] >= wad, "Dai/insufficient-balance");
+            require(or(gt(balanceOfSource, amount), eq(balanceOfSource, amount)))
+
+            // if (src != msg.sender && allowance[src][msg.sender] != uint(-1)) {
+            if and(neq(source, caller()), neq(allowanceOfSourceSender, MAX_UINT)) {
+                // require(allowance[src][msg.sender] >= wad, "Dai/insufficient-allowance");
+                require(gte(allowanceOfDestination, amount))
+
+                // allowance[src][msg.sender] = sub(allowance[src][msg.sender], wad);
+                sstore(mappingStorageKey2(source, destination, Storage.balance),
+                    sub(allowanceOfDestination, amount))
+            }
+
+            //  balanceOf[src] = sub(balanceOf[src], wad);
+            sstore(mappingStorageKey(source, Storage.balance),
+                sub(balanceOfSource, amount))
+
+            if iszero(destination) {
+              let totalSupply := sload(Storage.totalSupply)
+              sstore(Storage.totalSupply, sub(totalSupply, amount))
+            }
+
+            // balanceOf[dst] = add(balanceOf[dst], wad);
+            let balanceOfDestination := sload(mappingStorageKey(destination, Storage.balance))
+            sstore(mappingStorageKey(destination, Storage.balance),
+                add(balanceOfDestination, amount))
+
+            mstore(0, amount)
+            log3(0, 32, topic"event Transfer(address indexed source, address indexed destination, uint amount)",
+                source, destination)
+
+            returnTrue()
+        }
+
+        /* -------- return operations ---------- */
+        function returnUint(v) {
+            mstore(0, v)
+            return(0, 0x20)
+        }
+
+        function returnTrue() {
+            returnUint(1)
+        }
+
+        function returnString(s) {
+            let memPos := allocate_unbounded()
+            let memEnd := add(memPos, 32)
+            mstore(add(memPos, 0), sub(memEnd, memPos))
+
+            let length := mload(s)
+            mstore(memEnd, length)
+            memEnd := add(memEnd, 0x20)
+
+            mcopy(memEnd, add(s, 0x20), length)
+            mstore(add(memEnd, length), 0)
+
+            memEnd := add(memEnd, round_up_to_mul_of_32(length))
+
+            return(memPos, sub(memEnd, memPos))
+        }
+
+        /* -------- memory operations ---------- */
+        function array_store_length_for_encoding(pos, length) -> updated_pos {
+            mstore(pos, length)
+            updated_pos := add(pos, 0x20)
+        }
+
+        /* -------- storage access ---------- */
+        function extract_byte_array_length(_data) -> length {
+            length := div(_data, 2)
+            let outOfPlaceEncoding := and(_data, 1)
+            if iszero(outOfPlaceEncoding) {
+                length := and(length, 0x7f)
+            }
+        }
+
+        function array_data_slot(ptr) -> _data {
+            _data := ptr
+            mstore(0, ptr)
+            _data := keccak256(0, 0x20)
+        }
+
+        function read_string_from_storage(slot) -> _memPtr {
+            _memPtr := allocate_unbounded()
+
+            let end := 0
+            let slotValue := sload(slot)
+            let length := extract_byte_array_length(slotValue)
+            let str_part_ptr := array_store_length_for_encoding(_memPtr, length)
+            switch and(slotValue, 1)
+            case 0 {
+                // short byte array
+                mstore(str_part_ptr, and(slotValue, not(0xff)))
+                end := add(str_part_ptr, mul(0x20, iszero(iszero(length))))
+            }
+            case 1 {
+                // long byte array
+                let dataPos := array_data_slot(slot)
+                let i := 0
+                for { } lt(i, length) { i := add(i, 0x20) } {
+                    mstore(add(str_part_ptr, i), sload(dataPos))
+                    dataPos := add(dataPos, 1)
+                }
+                end := add(str_part_ptr, i)
+            }
+
+            finalize_allocation(_memPtr, sub(end, _memPtr))
+        }
+
+        // Solidity Style Storage Key: mapping(bytes32 => bytes32)
+        function mappingStorageKey(key, storageIndex) -> storageKey {
+            mstore(0, key, storageIndex)
+            storageKey := keccak256(0, 64)
+        }
+
+        // Solidity Style Storage Key: mapping(bytes32 => mapping(bytes32 => bytes32))
+        function mappingStorageKey2(key, key2, storageIndex) -> storageKey {
+            mstore(0, key, storageIndex, key2)
+            mstore(96, keccak256(0, 64))
+            storageKey := keccak256(64, 64)
+        }
+    }
+  }
+}
