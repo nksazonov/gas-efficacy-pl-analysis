@@ -228,18 +228,6 @@ function StringLayout.short_string.position(_pos) -> _offset {
     
 
     /* -------- HELPERS -------- */
-
-    /*
-    function round_up_to_mul_of_32(value) -> result {
-        result := and(add(value, 31), not(31))
-    }
-    function allocate_memory(size) -> _memPtr {
-        _memPtr := mload(64)
-        let newFreePtr := add(_memPtr, round_up_to_mul_of_32(size))
-        mstore(64, newFreePtr)
-    }
-    */
-
     function array_alloc_size(length) -> size {
         size := round_up_to_mul_of_32(length)
         // add length slot
@@ -785,7 +773,6 @@ function allowanceCalldata.owner.position(_pos) -> _offset {
             returnUint(allowance)
         }
 
-        // TODO: extract same functions to external object, and inherit it in both ERC20 and Runtime
         case 0x06fdde03 {
             let name := read_string_from_storage(0)
             returnString(name)
@@ -874,22 +861,6 @@ function allowanceCalldata.owner.position(_pos) -> _offset {
         }
 
         /* -------- memory operations ---------- */
-
-        /*
-        function round_up_to_mul_of_32(value) -> result {
-            result := and(add(value, 31), not(31))
-        }
-
-        function allocate_unbounded() -> _memPtr {
-            _memPtr := mload(64)
-        }
-
-        function finalize_allocation(_memPtr, size) {
-            let newFreePtr := add(_memPtr, round_up_to_mul_of_32(size))
-            mstore(64, newFreePtr)
-        }
-        */
-
         function array_store_length_for_encoding(pos, length) -> updated_pos {
             mstore(pos, length)
             updated_pos := safeAdd(pos, 0x20)

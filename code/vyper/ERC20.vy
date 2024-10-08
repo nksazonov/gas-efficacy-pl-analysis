@@ -16,14 +16,14 @@ totalSupply: public(uint256)
 
 
 @deploy
-def __init__(_name: String[32], _symbol: String[32], _decimals: uint8, _cap: uint256):
+def __init__(_name: String[32], _symbol: String[32], _decimals: uint8, _cap: uint256, _beneficiary: address):
     self.name = _name
     self.symbol = _symbol
     self.decimals = _decimals
     self.balanceOf[msg.sender] = _cap
     self.totalSupply = _cap
-    self._mint()
-    log IERC20.Transfer(empty(address), msg.sender, _cap)
+    self._mint(_beneficiary, _cap)
+    log IERC20.Transfer(empty(address), _beneficiary, _cap)
 
 
 @external
