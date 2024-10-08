@@ -1830,7 +1830,7 @@ The compiler can be installed using several methods, including pip, Docker or ni
 To compile the ERC20 token contract in Vyper without optimizations and save it to the `compiled/vyper/ERC20_no_opt.bytecode` file, the following command is used:
 
 ```bash
-vyper ./code/vyper/ERC20.vy --no-optimize | cut -c 3- | jq -R --slurp '{bin: .}' > code/compiled/vyper/ERC20_no_opt.json
+vyper ./code/vyper/ERC20.vy --no-optimize | cut -c 3- | jq -R --slurp '{bin: (.| sub("\n$"; ""))}' > code/compiled/vyper/ERC20_no_opt.json
 ```
 
 The Vyper CLI tool accepts the following optimization modes: "none", "codesize", or "gas" (default).
@@ -1844,7 +1844,7 @@ In a gas optimization mode, the compiler will try to generate bytecode which min
 To compile the contract with gas optimization enabled, the following command is used:
 
 ```bash
-vyper ./code/vyper/ERC20.vy | cut -c 3- | jq -R --slurp '{bin: .}' > code/compiled/vyper/ERC20_opt_gas.json
+vyper ./code/vyper/ERC20.vy | cut -c 3- | jq -R --slurp '{bin: (.| sub("\n$"; ""))}' > code/compiled/vyper/ERC20_opt_gas.json
 ```
 
 In codesize optimized mode, the compiler will try hard to minimize codesize by:
@@ -1856,7 +1856,7 @@ In codesize optimized mode, the compiler will try hard to minimize codesize by:
 To compile the contract with codesize optimization enabled, the following command is used:
 
 ```bash
-vyper ./code/vyper/ERC20.vy --optimize codesize | cut -c 3- | jq -R --slurp '{bin: .}' > code/compiled/vyper/ERC20_opt_codesize.json
+vyper ./code/vyper/ERC20.vy --optimize codesize | cut -c 3- | jq -R --slurp '{bin: (.| sub("\n$"; ""))}' > code/compiled/vyper/ERC20_opt_codesize.json
 ```
 
 **Yul**. The Yul contract is compiled using the solc compiler as it has a built-in Yul compiler. There is no standalone Yul compiler as of time of writing.
@@ -1866,7 +1866,7 @@ The contract is compiled with and without optimizations to evaluate the impact o
 To compile the ERC20 token contract in Yul without optimizations and save it to the `compiled/yul/ERC20.yul` file, the following command is used:
 
 ```bash
-solc --strict-assembly --bin code/yul/ERC20.yul | grep -A 1 "Binary representation:" | tail -n 1 | jq -R --slurp '{bin: .}' > code/compiled/yul/ERC20_no_opt.json
+solc --strict-assembly --bin code/yul/ERC20.yul | grep -A 1 "Binary representation:" | tail -n 1 | jq -R --slurp '{bin: (.| sub("\n$"; ""))}' > code/compiled/yul/ERC20_no_opt.json
 ```
 
 We had to resert to using `grep` and `tail` to extract the bytecode from the compiler output, as the output of the compilation is a string, that includes the purposeless "Binary representation:" and "=========" parts.
@@ -1874,7 +1874,7 @@ We had to resert to using `grep` and `tail` to extract the bytecode from the com
 To compile the contract with optimizations enabled, the following command is used:
 
 ```bash
-solc --strict-assembly --optimize --bin code/yul/ERC20.yul | grep -A 1 "Binary representation:" | tail -n 1 | jq -R --slurp '{bin: .}' > code/compiled/yul/ERC20_opt.json
+solc --strict-assembly --optimize --bin code/yul/ERC20.yul | grep -A 1 "Binary representation:" | tail -n 1 | jq -R --slurp '{bin: (.| sub("\n$"; ""))}' > code/compiled/yul/ERC20_opt.json
 ```
 
 The default optimization runs is 200, however, it can be changed with the `--optimize-runs` flag. Nevertheless, compiling with higher number of runs produces the same bytecode in our case, therefore this compilation option is not compared.
@@ -1885,7 +1885,7 @@ The compiler can be run as a JavaScript function, which takes the Yulp code as i
 Therefore, to get the bytecode, the resulting Yul code must be compiled with the solc compiler:
 
 ```bash
-node ./code/yulp/compile.js  && solc --strict-assembly --bin code/compiled/yulp/ir_ERC20.yul | grep -A 1 "Binary representation:" | tail -n 1 | jq -R --slurp '{bin: .}' > code/compiled/yulp/ERC20.json
+node ./code/yulp/compile.js  && solc --strict-assembly --bin code/compiled/yulp/ir_ERC20.yul | grep -A 1 "Binary representation:" | tail -n 1 | jq -R --slurp '{bin: (.| sub("\n$"; ""))}' > code/compiled/yulp/ERC20.json
 ```
 
 It should also be mentioned that the Yulp compiler development is discontinued, as its repository has been archived since Febuary 2022.
