@@ -1778,10 +1778,10 @@ The compiler can be installed using several methods, including npm, Docker, apt-
 
 An acute reader may realize that during a prolonged and frequent development, the same project can use several compiler versions to incorporate for more new feature, optimizations and bug fixes. However, it may be inconvenient to reinstall the compiler each time. In this case, it may be useful to use a "solc-select" CLI tool, that allows to install and switch between different versions of the Solidity compiler. https://github.com/crytic/solc-select
 
-To compile the ERC20 token contract in Solidity without optimizations and save it to the `compiled/solidity/ERC20_no_opt.bin` file, the following command is used:
+To compile the ERC20 token contract in Solidity without optimizations and save it to the `out/solidity/ERC20_no_opt.bin` file, the following command is used:
 
 ```bash
-solc --combined-json bin ./code/solidity/ERC20.sol | jq -r '.contracts["code/solidity/ERC20.sol:ERC20"]' > code/compiled/solidity/ERC20_no_opt.json
+solc --combined-json bin src/solidity/ERC20.sol | jq -r '.contracts["src/solidity/ERC20.sol:ERC20"]' > out/solidity/ERC20_no_opt.json
 ```
 
 Solc provides the following optimizer options:
@@ -1812,7 +1812,7 @@ The intermediate representation (IR) is a representation of the contract that is
 To compile in the IR mode, the `--via-ir` flag is used:
 
 ```bash
-solc --via-ir --optimize --optimize-runs 200 --combined-json bin ./code/solidity/ERC20.sol | jq -r '.contracts["code/solidity/ERC20.sol:ERC20"]' > code/compiled/solidity/ERC20_ir.json
+solc --via-ir --optimize --optimize-runs 200 --combined-json bin src/solidity/ERC20.sol | jq -r '.contracts["src/solidity/ERC20.sol:ERC20"]' > out/solidity/ERC20_ir.json
 ```
 
 The `--optimize` flag enables the optimizer, which performs various optimizations on the contract code to reduce gas consumption and improve performance. The `--optimize-runs` flag specifies the number of runs each function is expected to be used, affecting the level of optimization applied. Lower values optimize for initial deployment cost, while higher values optimize for high-frequency usage.
@@ -1820,7 +1820,7 @@ The `--optimize` flag enables the optimizer, which performs various optimization
 To compile the contract with the optimizer enabled and set to 100000 runs, the following command is used:
 
 ```bash
-solc --optimize --optimize-runs 100000 --combined-json bin ./code/solidity/ERC20.sol | jq -r '.contracts["code/solidity/ERC20.sol:ERC20"]' > code/compiled/solidity/ERC20_opt.json
+solc --optimize --optimize-runs 100000 --combined-json bin src/solidity/ERC20.sol | jq -r '.contracts["src/solidity/ERC20.sol:ERC20"]' > out/solidity/ERC20_opt.json
 ```
 
 **Vyper**. The Vyper contract is compiled using the vyper compiler and different optimization modes are used: "none", "codesize" and "gas". Each of them is used to evaluate the impact on gas efficiency.
@@ -1830,7 +1830,7 @@ The compiler can be installed using several methods, including pip, Docker or ni
 To compile the ERC20 token contract in Vyper without optimizations and save it to the `compiled/vyper/ERC20_no_opt.bytecode` file, the following command is used:
 
 ```bash
-vyper ./code/vyper/ERC20.vy --no-optimize | cut -c 3- | jq -R --slurp '{bin: (.| sub("\n$"; ""))}' > code/compiled/vyper/ERC20_no_opt.json
+vyper src/vyper/ERC20.vy --no-optimize | cut -c 3- | jq -R --slurp '{bin: (.| sub("\n$"; ""))}' > out/vyper/ERC20_no_opt.json
 ```
 
 The Vyper CLI tool accepts the following optimization modes: "none", "codesize", or "gas" (default).
@@ -1844,7 +1844,7 @@ In a gas optimization mode, the compiler will try to generate bytecode which min
 To compile the contract with gas optimization enabled, the following command is used:
 
 ```bash
-vyper ./code/vyper/ERC20.vy | cut -c 3- | jq -R --slurp '{bin: (.| sub("\n$"; ""))}' > code/compiled/vyper/ERC20_opt_gas.json
+vyper src/vyper/ERC20.vy | cut -c 3- | jq -R --slurp '{bin: (.| sub("\n$"; ""))}' > out/vyper/ERC20_opt_gas.json
 ```
 
 In codesize optimized mode, the compiler will try hard to minimize codesize by:
@@ -1856,7 +1856,7 @@ In codesize optimized mode, the compiler will try hard to minimize codesize by:
 To compile the contract with codesize optimization enabled, the following command is used:
 
 ```bash
-vyper ./code/vyper/ERC20.vy --optimize codesize | cut -c 3- | jq -R --slurp '{bin: (.| sub("\n$"; ""))}' > code/compiled/vyper/ERC20_opt_codesize.json
+vyper src/vyper/ERC20.vy --optimize codesize | cut -c 3- | jq -R --slurp '{bin: (.| sub("\n$"; ""))}' > out/vyper/ERC20_opt_codesize.json
 ```
 
 **Yul**. The Yul contract is compiled using the solc compiler as it has a built-in Yul compiler. There is no standalone Yul compiler as of time of writing.
@@ -1866,7 +1866,7 @@ The contract is compiled with and without optimizations to evaluate the impact o
 To compile the ERC20 token contract in Yul without optimizations and save it to the `compiled/yul/ERC20.yul` file, the following command is used:
 
 ```bash
-solc --strict-assembly --bin code/yul/ERC20.yul | grep -A 1 "Binary representation:" | tail -n 1 | jq -R --slurp '{bin: (.| sub("\n$"; ""))}' > code/compiled/yul/ERC20_no_opt.json
+solc --strict-assembly --bin src/yul/ERC20.yul | grep -A 1 "Binary representation:" | tail -n 1 | jq -R --slurp '{bin: (.| sub("\n$"; ""))}' > out/yul/ERC20_no_opt.json
 ```
 
 We had to resert to using `grep` and `tail` to extract the bytecode from the compiler output, as the output of the compilation is a string, that includes the purposeless "Binary representation:" and "=========" parts.
@@ -1874,7 +1874,7 @@ We had to resert to using `grep` and `tail` to extract the bytecode from the com
 To compile the contract with optimizations enabled, the following command is used:
 
 ```bash
-solc --strict-assembly --optimize --bin code/yul/ERC20.yul | grep -A 1 "Binary representation:" | tail -n 1 | jq -R --slurp '{bin: (.| sub("\n$"; ""))}' > code/compiled/yul/ERC20_opt.json
+solc --strict-assembly --optimize --bin src/yul/ERC20.yul | grep -A 1 "Binary representation:" | tail -n 1 | jq -R --slurp '{bin: (.| sub("\n$"; ""))}' > out/yul/ERC20_opt.json
 ```
 
 The default optimization runs is 200, however, it can be changed with the `--optimize-runs` flag. Nevertheless, compiling with higher number of runs produces the same bytecode in our case, therefore this compilation option is not compared.
@@ -1885,7 +1885,7 @@ The compiler can be run as a JavaScript function, which takes the Yulp code as i
 Therefore, to get the bytecode, the resulting Yul code must be compiled with the solc compiler:
 
 ```bash
-node ./code/yulp/compile.js && solc --strict-assembly --bin code/compiled/yulp/ir_ERC20.yul | grep -A 1 "Binary representation:" | tail -n 1 | jq -R --slurp '{bin: (.| sub("\n$"; ""))}' > code/compiled/yulp/ERC20.json
+node ./src/yulp/compile.js && solc --strict-assembly --bin out/yulp/ir_ERC20.yul | grep -A 1 "Binary representation:" | tail -n 1 | jq -R --slurp '{bin: (.| sub("\n$"; ""))}' > out/yulp/ERC20.json
 ```
 
 It should also be mentioned that the Yulp compiler development is discontinued, as its repository has been archived since Febuary 2022.
@@ -1905,7 +1905,7 @@ It is worth noting that there is no ability to output the resulting bytecode to 
 To compile the ERC20 token contract in Fe without optimizations, the following command is used:
 
 ```bash
-fe build --optimize false -e bytecode ./code/fe/ERC20.fe -o ./code/compiled/fe
+fe build --optimize false -e bytecode src/fe/ERC20.fe -o out/fe
 ```
 
 However, this produces an error:
@@ -1932,8 +1932,10 @@ which suggests that an internal error has occurred, and the compiler is not yet 
 However, compiling with optimizations enabled produces the bytecode:
 
 ```bash
-fe build -o ./code/compiled/fe -e bytecode ./code/fe/ERC20.fe && jq -R --slurp '{bin: .}' code/compiled/fe/ERC20/ERC20.bin  > code/compiled/fe/ERC20.json
+fe build -o out/fe -e bytecode src/fe/ERC20.fe && jq -R --slurp '{bin: .}' out/fe/ERC20/ERC20.bin  > out/fe/ERC20.json
 ```
+
+// TODO: add `burn` function description
 
 #### 3.3.5. Benchmarking the resulting bytecode
 
