@@ -1885,7 +1885,7 @@ The compiler can be run as a JavaScript function, which takes the Yulp code as i
 Therefore, to get the bytecode, the resulting Yul code must be compiled with the solc compiler:
 
 ```bash
-node ./code/yulp/compile.js  && solc --strict-assembly --bin code/compiled/yulp/ir_ERC20.yul | grep -A 1 "Binary representation:" | tail -n 1 | jq -R --slurp '{bin: (.| sub("\n$"; ""))}' > code/compiled/yulp/ERC20.json
+node ./code/yulp/compile.js && solc --strict-assembly --bin code/compiled/yulp/ir_ERC20.yul | grep -A 1 "Binary representation:" | tail -n 1 | jq -R --slurp '{bin: (.| sub("\n$"; ""))}' > code/compiled/yulp/ERC20.json
 ```
 
 It should also be mentioned that the Yulp compiler development is discontinued, as its repository has been archived since Febuary 2022.
