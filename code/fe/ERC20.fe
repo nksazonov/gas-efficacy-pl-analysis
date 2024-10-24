@@ -86,6 +86,10 @@ contract ERC20 {
         return true
     }
 
+    pub fn burn(mut self, mut ctx: Context, amount: u256) {
+        self._burn(ctx, account: ctx.msg_sender(), value: amount)
+    }
+
     fn _transfer(mut self, mut ctx: Context, sender: address, recipient: address, value: u256) {
         assert sender != 0
         assert recipient != 0

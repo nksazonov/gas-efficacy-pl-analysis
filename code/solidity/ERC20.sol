@@ -22,4 +22,8 @@ contract ERC20 is AbstractERC20Capped {
     function decimals() public view override returns (uint8) {
         return _decimals;
     }
+
+    function burn(uint256 amount) public {
+        _burn(msg.sender, amount);
+    }
 }

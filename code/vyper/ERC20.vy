@@ -85,17 +85,6 @@ def burn(_value: uint256):
     self._burn(msg.sender, _value)
 
 
-@external
-def burnFrom(_to: address, _value: uint256):
-    """
-    @dev Burn an amount of the token from a given account.
-    @param _to The account whose tokens will be burned.
-    @param _value The amount that will be burned.
-    """
-    self.allowance[_to][msg.sender] -= _value
-    self._burn(_to, _value)
-
-
 @internal
 def _mint(_to: address, _value: uint256):
     """

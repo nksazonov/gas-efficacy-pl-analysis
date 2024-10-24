@@ -194,6 +194,9 @@ object "Token" {
             case 0xdd62ed3e /* "allowance(address,address)" */ {
                 returnUint(allowance(decodeAsAddress(0), decodeAsAddress(1)))
             }
+            case 0x42966c68 /* "burn(uint256)" */ {
+                burn(caller(), decodeAsUint(0))
+            }
             default {
                 revert(0, 0)
             }
@@ -218,6 +221,11 @@ object "Token" {
                 }
                 addToBalance(to, amount)
                 emitTransfer(from, to, amount)
+            }
+            function burn(from, amount) {
+                deductFromBalance(from, amount)
+                sstore(totalSupplyPos(), sub(totalSupply(), amount))
+                emitTransfer(from, 0, amount)
             }
 
 

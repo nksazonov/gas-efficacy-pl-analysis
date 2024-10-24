@@ -158,6 +158,11 @@ object "ERC20" is "Utils" {
 
         switch mslice(_calldata, 4) // 4 byte calldata signature
 
+        case sig"burn(uint256 amount)" {
+            mstruct burnCalldata(sig: 4, amount: 32)
+            executeTransfer(caller(), 0, burnCalldata.amount(_calldata))
+        }
+
         case sig"transfer(address owner, uint256 amount) returns (bool success)" {
             mstruct transferCalldata(sig: 4, owner: 32, amount: 32)
 
@@ -234,12 +239,12 @@ object "ERC20" is "Utils" {
             let allowanceOfDestination := sload(mappingStorageKey2(source, destination, Storage.balance))
             let allowanceOfSourceSender := sload(mappingStorageKey2(source, caller(), Storage.allowance))
 
-            // require(balanceOf[src] >= wad, "Dai/insufficient-balance");
+            // require(balanceOf[src] >= wad, "insufficient-balance");
             require(or(gt(balanceOfSource, amount), eq(balanceOfSource, amount)))
 
             // if (src != msg.sender && allowance[src][msg.sender] != uint(-1)) {
             if and(neq(source, caller()), neq(allowanceOfSourceSender, MAX_UINT)) {
-                // require(allowance[src][msg.sender] >= wad, "Dai/insufficient-allowance");
+                // require(allowance[src][msg.sender] >= wad, "insufficient-allowance");
                 require(gte(allowanceOfDestination, amount))
 
                 // allowance[src][msg.sender] = sub(allowance[src][msg.sender], wad);

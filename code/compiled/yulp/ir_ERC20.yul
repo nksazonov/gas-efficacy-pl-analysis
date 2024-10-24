@@ -393,6 +393,53 @@ function mslice(position, length) -> result {
 
         switch mslice(128, 4) // 4 byte calldata signature
 
+        case 0x42966c68 {
+
+function burnCalldata.amount(pos) -> res {
+  res := mslice(burnCalldata.amount.position(pos), 32)
+}
+
+
+
+function burnCalldata.amount.position(_pos) -> _offset {
+  
+      
+        function burnCalldata.amount.position._chunk0(pos) -> __r {
+          __r := 0x04
+        }
+      
+        function burnCalldata.amount.position._chunk1(pos) -> __r {
+          __r := pos
+        }
+      
+
+      _offset := add(burnCalldata.amount.position._chunk0(_pos), add(burnCalldata.amount.position._chunk1(_pos), 0))
+    
+}
+
+
+
+function burnCalldata.sig.position(_pos) -> _offset {
+  
+      
+        function burnCalldata.sig.position._chunk0(pos) -> __r {
+          __r := 0x00
+        }
+      
+        function burnCalldata.sig.position._chunk1(pos) -> __r {
+          __r := pos
+        }
+      
+
+      _offset := add(burnCalldata.sig.position._chunk0(_pos), add(burnCalldata.sig.position._chunk1(_pos), 0))
+    
+}
+
+
+            
+            executeTransfer(caller(), 0, burnCalldata.amount(128))
+        }
+
         case 0xa9059cbb {
 
 function transferCalldata.owner(pos) -> res {
@@ -799,12 +846,12 @@ function allowanceCalldata.owner.position(_pos) -> _offset {
             let allowanceOfDestination := sload(mappingStorageKey2(source, destination, 4))
             let allowanceOfSourceSender := sload(mappingStorageKey2(source, caller(), 5))
 
-            // require(balanceOf[src] >= wad, "Dai/insufficient-balance");
+            // require(balanceOf[src] >= wad, "insufficient-balance");
             require(or(gt(balanceOfSource, amount), eq(balanceOfSource, amount)), 0)
 
             // if (src != msg.sender && allowance[src][msg.sender] != uint(-1)) {
             if and(neq(source, caller()), neq(allowanceOfSourceSender, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff)) {
-                // require(allowance[src][msg.sender] >= wad, "Dai/insufficient-allowance");
+                // require(allowance[src][msg.sender] >= wad, "insufficient-allowance");
                 require(gte(allowanceOfDestination, amount), 0)
 
                 // allowance[src][msg.sender] = sub(allowance[src][msg.sender], wad);
