@@ -4,4 +4,4 @@ out = "out"
 libs = ["lib"]
 solc-version = "0.8.25"
 evm_version = "cancun"
-fs_permissions = [{access = "read", path = "../code/compiled"}]
+fs_permissions = [{access = "read", path = "../out"}]
