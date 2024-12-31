@@ -1562,6 +1562,7 @@ It is worth noting that the logic and parameters of the constructor function are
 - Preminting supply - deploying with minting all tokens to the deployer / specified address.
 - Preminting amount and mintable - deploying with minting only a specified amount of tokens to the deployer / specified address. Owner can mint more tokens later.
 - Customizable token - an ability to specify the name, symbol, and decimals of the token.
+- Burneable token - an ability to "burn" token by moving them out of circulation by sending them to an unaccessible address.
 
 The latter is the most common practice due to its flexibility and ability to customize the token contract according to specific requirements.
 The preminting supply is also common, especially in ICOs and token sales, where all tokens are minted at the contract deployment, i.e. "fire and forget" approach.
@@ -1576,6 +1577,7 @@ Finalizing, the benchmark contract implements ERC20 standard with the following 
 - Customizable token name, symbol, and decimals.
 - Preminting supply of tokens to the deployer.
 - Capped supply of tokens.
+- Burnable tokens.
 
 #### 3.3.2. Gas comparison criteria
 
@@ -1585,19 +1587,41 @@ In order to effectively compare the gas efficiency of programming languages, sev
 
 Bytecode size refers to the size of the compiled contract code that is deployed to the Ethereum blockchain. The size of the bytecode impacts deployment costs, as larger contracts require more gas to be deployed. Efficient compilation leads to smaller bytecode, which can significantly reduce deployment gas fees. Each language will be assessed based on how compact and optimized its bytecode is after compilation.
 
-##### 3.3.2.2. Gas Used for transfer()
+#### 3.3.2.2. Deployment gas cost of the contract
 
-The transfer() function is one of the core operations of the ERC20 token contract, allowing token holders to send tokens to another address. Gas consumption for this function reflects how efficiently the language handles standard token transfers, which are one of the most common operations in tokenized applications. Comparing the gas used for transfer() in different languages provides insight into how well each language optimizes for simple state changes in a contract.
+The deployment gas cost of the contract reflects the efficiency of the language in generating bytecode and initializing contract state. Lower deployment costs indicate that the language optimizes for gas efficiency during contract creation, reducing the overhead associated with deploying new contracts. Measuring the gas cost of deploying the ERC20 token contract provides insight into how well each language manages contract initialization and bytecode generation.
 
-##### 3.3.2.3. Gas Used for approve()
+##### 3.3.2.3. Gas Used for mutative functions
+
+Mutative functions are functions that modify the state of the contract, such as minting new tokens, transferring tokens between addresses, or burning tokens. The gas used for these functions reflects how efficiently the language handles state changes and updates to the contract’s storage. Measuring gas consumption for mutative functions helps to evaluate how well each language optimizes for state modifications and storage updates, which are critical for contract execution.
 
 The approve() function allows a token holder to authorize a third party (typically another contract) to spend tokens on their behalf. This is crucial for enabling decentralized finance (DeFi) operations, where contracts need to interact with tokens on behalf of users. The gas used for approve() reflects the efficiency of managing allowances and permissions within the contract. Measuring this operation helps to assess how well the language manages gas consumption for security-sensitive operations like permission delegation.
 
-##### 3.3.2.4. Gas Used for transferFrom()
+The transfer() function is one of the core operations of the ERC20 token contract, allowing token holders to send tokens to another address. Gas consumption for this function reflects how efficiently the language handles standard token transfers, which are one of the most common operations in tokenized applications. Comparing the gas used for transfer() in different languages provides insight into how well each language optimizes for simple state changes in a contract.
 
 The transferFrom() function allows a third party, once approved, to transfer tokens on behalf of the token holder. This is a more complex operation than transfer(), as it involves both authorization checks and token transfers. Measuring gas consumption for this function reveals how efficiently each language handles multi-step operations and contract logic that involves checks, updates, and state modifications. It also provides a clearer understanding of how the language optimizes more intricate contract interactions.
 
+The burn() function allows token holders to destroy tokens, removing them from circulation. This operation is essential for managing token supply and ensuring that tokens can be removed when needed. The gas used for burn() reflects how efficiently the language handles token destruction and state updates.
+
 By evaluating these criteria, a comprehensive comparison of the gas efficiency of each language can be established, providing insight into the strengths and weaknesses of each language in terms of execution cost and bytecode optimization.
+
+#### 3.3.2.4. Gas Used for view functions
+
+View functions are functions that read data from the contract without modifying the state. These functions are essential for querying contract state, checking balances, and retrieving information without incurring gas costs.
+When called from outside of the blockchain, view functions are free to execute, as they do not alter the contract state. However, when called from within the blockchain, view functions consume gas to prevent abuse and ensure that contract interactions are appropriately priced.
+The gas used for view functions reflects how efficiently the language handles read-only operations and minimizes gas consumption for non-mutative operations.
+
+The name() function retrieves the name of the token, providing a human-readable identifier for the token contract. This operation is essential for identifying tokens and distinguishing between different assets in a decentralized application.
+
+The symbol() function retrieves the symbol of the token, which is a shorthand representation of the token’s name. This operation is commonly used to display token symbols in user interfaces and applications.
+
+The decimals() function retrieves the number of decimal places used by the token, indicating the divisibility of the token. This operation is crucial for handling token amounts accurately and ensuring that token transfers are precise.
+
+The totalSupply() function retrieves the total supply of tokens issued by the contract. This operation is essential for tracking the total number of tokens in circulation and managing the token economy.
+
+The balanceOf() function retrieves the token balance of a specific address. This operation is a common use case in decentralized applications, where users need to check their token holdings.
+
+The allowance() function retrieves the amount of tokens that a token holder has approved for a specific spender. This operation is crucial for managing token permissions and authorizations.
 
 #### 3.3.3. Developing the Smart Contract
 
@@ -1935,15 +1959,98 @@ However, compiling with optimizations enabled produces the bytecode:
 fe build -o out/fe -e bytecode src/fe/ERC20.fe && jq -R --slurp '{bin: .}' out/fe/ERC20/ERC20.bin  > out/fe/ERC20.json
 ```
 
-// TODO: add `burn` function description
-
 #### 3.3.5. Benchmarking the resulting bytecode
 
-The bytecode generated by each compiler is benchmarked using forge gas reports, that executes a custom script that deploys the contract to a local Ethereum chain and measures the gas consumption of key operations. The script interacts with the contract to execute the transfer(), approve(), and transferFrom() functions, recording the gas used for each operation. The benchmarking process is repeated multiple times to ensure consistent results and account for variations in gas consumption.
+All bytecodes generated by each compilers should be benchmarked using the same script, that deploys the contract to a local Ethereum chain and measures the gas consumption of key operations. Firstly, it was planned to use forge gas-report tool (https://book.getfoundry.sh/forge/gas-reports), however, it turned out that it does not work with raw bytecode, but does only with the contracts written in Solidity.
+For this reason, an issue on Foundry GitHub repository was created and communicated upon (https://github.com/foundry-rs/foundry/issues/6129). Nevertheless, after developer team has added some workarounds, the key issue still remains.
+
+Therefore, another approach was used to benchmark the bytecode. Instead of using forge gas-report tool, a gas snapshot cheatcodes were used (https://book.getfoundry.sh/forge/gas-section-snapshots), which basically resemble what the gas-report tool does under the hood.
+The test interacts with the contract to execute the burn(), approve(), transfer() and transferFrom() mutative functions, and name(), symbol(), decimals(), totalSupply(), balanceOf(), allowance() view functions, recording the gas used for each operation. Also, the deployment gas cost is recorded.
+Gas snapshots cheatcode create a `snapshot` folder with a json file of a test contract's name, that contains the snapshots with names specified in tests. Each field of the snapshot object corresponds to a snapshot name used in the test, and the value is the gas used for the operation.
 
 To ensure accurate and reliable gas measurements, the contracts receive the same paratemers and tested in the same environment.
 
+It is also worth mentioning that the tests are run with the `--isolate` flag, which enables the isolation of calls.
+In isolation mode all top-level calls are executed as a separate transaction in a separate EVM context, enabling more precise gas accounting and transaction state changes
+
+Gas benchmarks are run the the following command:
+
+```bash
+BYTECODE_PATH=../out/<path_to_bytecode> forge test  --isolate ./test/ERC20Benchmark.t.sol
+```
+
+To ease the benchmarking, a Makefile was created, that can run benchmarks for all languages with a simple command.
+
 ### 3.4. Comparison results
+
+#### 3.4.1. Gas report and snapshot
+
+For the sake of research, it was decided to compare the gas consumption measurements accuracy of the gas-report tool and the gas snapshots cheatcodes, the first one being the tool that is supposed to be used for the research, and the second one being a workaround.
+
+The gas-report tool results are more detailed and provide a mininum, average, median and maximum gas consumption for each operation, as well as the total gas consumption for the contract deployment. The gas snapshots cheatcodes provide a single gas measurement for each operation, without additional statistics.
+
+Note, that for clearer comparison, the ERC20 Solidity contract used with the gas-report tool must be compiled with the same number of optimisations as the one used with the gas snapshots cheatcodes.
+
+The results of running a gas-report tool are the following:
+
+<!--
+╭---------------------------------------+-----------------+-------+--------+-------+---------╮
+| src/solidity/ERC20.sol:ERC20 Contract |                 |       |        |       |         |
++============================================================================================+
+| Deployment Cost                       | Deployment Size |       |        |       |         |
+|---------------------------------------+-----------------+-------+--------+-------+---------|
+| 749211                                | 4299            |       |        |       |         |
+|---------------------------------------+-----------------+-------+--------+-------+---------|
+|                                       |                 |       |        |       |         |
+|---------------------------------------+-----------------+-------+--------+-------+---------|
+| Function Name                         | Min             | Avg   | Median | Max   | # Calls |
+|---------------------------------------+-----------------+-------+--------+-------+---------|
+| allowance                             | 753             | 753   | 753    | 753   | 515     |
+|---------------------------------------+-----------------+-------+--------+-------+---------|
+| approve                               | 26130           | 46108 | 46258  | 46630 | 1029    |
+|---------------------------------------+-----------------+-------+--------+-------+---------|
+| balanceOf                             | 580             | 1381  | 580    | 2580  | 2575    |
+|---------------------------------------+-----------------+-------+--------+-------+---------|
+| burn                                  | 33743           | 33798 | 33779  | 33851 | 257     |
+|---------------------------------------+-----------------+-------+--------+-------+---------|
+| decimals                              | 249             | 249   | 249    | 249   | 257     |
+|---------------------------------------+-----------------+-------+--------+-------+---------|
+| name                                  | 927             | 1223  | 1325   | 3106  | 257     |
+|---------------------------------------+-----------------+-------+--------+-------+---------|
+| symbol                                | 925             | 1216  | 1104   | 3104  | 257     |
+|---------------------------------------+-----------------+-------+--------+-------+---------|
+| totalSupply                           | 303             | 1305  | 2303   | 2303  | 1029    |
+|---------------------------------------+-----------------+-------+--------+-------+---------|
+| transfer                              | 24173           | 37804 | 26761  | 51582 | 514     |
+|---------------------------------------+-----------------+-------+--------+-------+---------|
+| transferFrom                          | 24479           | 35562 | 24971  | 57557 | 772     |
+╰---------------------------------------+-----------------+-------+--------+-------+---------╯
+-->
+
+The following table shows the gas consumption measurements for the ERC20 token contract in Solidity using the gas-report tool (average results) and gas snapshots cheatcodes.
+
+| Function     | Gas report (avg) | Gas report (max)     | Gas snapshots |
+| ------------ | ---------------- | -------------------- | ------------- |
+| deployment   | 749211           | 749211 (same as avg) | 781711        |
+| --           | --               | ---                  | --            |
+| approve      | 46108            | 46630                | 46102         |
+| transfer     | 37804            | 51582                | 51318         |
+| transferFrom | 35562            | 57557                | 52493         |
+| burn         | 33798            | 33851                | 33803         |
+| --           | --               |                      | --            |
+| allowance    | 753              | 753                  | 753           |
+| balanceOf    | 1381             | 2580                 | 2580          |
+| decimals     | 249              | 249                  | 249           |
+| name         | 1223             | 3106                 | 3106          |
+| symbol       | 1216             | 3104                 | 3104          |
+| totalSupply  | 1305             | 2303                 | 2303          |
+
+As can be seen, the gas consumption measurements for the ERC20 token contract in Solidity using the gas-report tool and gas snapshots cheatcodes are nearly consistent across most operations.
+It can be noted that gas snapshots results are closer to the maximum gas report values, than the average. The possible reason is that gas report tool measures several calls to the same function (the `balanceOf` was measured 2575 times), whereas gas snapshots measure only one call.
+Even considering the differences, the gas snapshots results are incredibly close to the maximum gas report values, which indicates that the gas snapshots cheatcodes provide reliable gas consumption measurements for the ERC20 token contract in Solidity.
+Therefore, the gas snapshots cheatcodes provide a reliable alternative for measuring gas consumption when the gas-report tool is not available or does not support raw bytecode.
+
+#### 3.4.2. Cross-language comparison
 
 Mention forge-vyper, forge-yulp, forge-fe integration
 
