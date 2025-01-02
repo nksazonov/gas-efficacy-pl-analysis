@@ -210,7 +210,9 @@ object "Token" {
                 emitApproval(caller(), spender, amount)
             }
             function transferFrom(from, to, amount) {
-                decreaseAllowanceBy(from, caller(), amount)
+                if notEq(allowance(from, caller()),u256Max()) {
+                    decreaseAllowanceBy(from, caller(), amount)
+                }
                 executeTransfer(from, to, amount)
             }
             function executeTransfer(from, to, amount) {
@@ -414,6 +416,12 @@ object "Token" {
             }
             function require(condition) {
                 if iszero(condition) { revert(0, 0) }
+            }
+            function notEq(a, b) -> nEq {
+                nEq := iszero(eq(a,b))
+            }
+            function u256Max() -> m {
+                m := 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
             }
         }
     }
