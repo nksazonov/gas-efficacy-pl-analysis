@@ -1,3 +1,5 @@
+use std::traits::Max
+
 struct Approval {
     #indexed
     pub owner: address
@@ -72,7 +74,9 @@ contract ERC20 {
     pub fn transferFrom(mut self, mut ctx: Context, sender: address, recipient: address, value: u256) -> bool {
         assert self._allowances[sender][ctx.msg_sender()] >= value
         self._transfer(ctx, sender, recipient, value)
-        self._approve(ctx, owner: sender, spender: ctx.msg_sender(), value: self._allowances[sender][ctx.msg_sender()] - value)
+        if self._allowances[sender][ctx.msg_sender()] != u256::max() {
+            self._approve(ctx, owner: sender, spender: ctx.msg_sender(), value: self._allowances[sender][ctx.msg_sender()] - value)
+        }
         return true
     }
 
