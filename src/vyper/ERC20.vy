@@ -49,7 +49,7 @@ def transferFrom(_from : address, _to : address, _value : uint256) -> bool:
     # NOTE: vyper does not allow underflows
     #       so the following subtraction would revert on insufficient balance
     self.balanceOf[_from] -= _value
-    self.balanceOf[_to] += max_value
+    self.balanceOf[_to] += _value
     # NOTE: if allowance = uint256, then does not spend it
     if self.allowance[_from][msg.sender] != max_value(uint256):
         # NOTE: vyper does not allow underflows
