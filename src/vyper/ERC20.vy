@@ -20,10 +20,7 @@ def __init__(_name: String[32], _symbol: String[32], _decimals: uint8, _cap: uin
     self.name = _name
     self.symbol = _symbol
     self.decimals = _decimals
-    self.balanceOf[msg.sender] = _cap
-    self.totalSupply = _cap
     self._mint(_beneficiary, _cap)
-    log IERC20.Transfer(empty(address), _beneficiary, _cap)
 
 
 @external
@@ -52,10 +49,12 @@ def transferFrom(_from : address, _to : address, _value : uint256) -> bool:
     # NOTE: vyper does not allow underflows
     #       so the following subtraction would revert on insufficient balance
     self.balanceOf[_from] -= _value
-    self.balanceOf[_to] += _value
-    # NOTE: vyper does not allow underflows
-    #      so the following subtraction would revert on insufficient allowance
-    self.allowance[_from][msg.sender] -= _value
+    self.balanceOf[_to] += max_value
+    # NOTE: if allowance = uint256, then does not spend it
+    if self.allowance[_from][msg.sender] != max_value(uint256):
+        # NOTE: vyper does not allow underflows
+        #      so the following subtraction would revert on insufficient allowance
+        self.allowance[_from][msg.sender] -= _value
     log IERC20.Transfer(_from, _to, _value)
     return True
 
