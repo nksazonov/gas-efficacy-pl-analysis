@@ -5,10 +5,7 @@ import {Vm, Test, console} from "forge-std/Test.sol";
 import {StdCheats} from "forge-std/StdCheats.sol";
 
 import {IERC20} from "../src/IERC20.sol";
-
-// FIXME: add explicit "burn" function to each contract, and recompile everything
-// maybe add command for a total recompile
-// maybe in a Makefile :wink:
+import {ERC20} from "../src/solidity/ERC20.sol";
 
 contract ERC20Benchmark is StdCheats, Test {
     address beneficiary = vm.createWallet("beneficiary").addr;
@@ -20,13 +17,11 @@ contract ERC20Benchmark is StdCheats, Test {
     uint8 decimals = 18;
     uint256 totalSupply = 1000000e18;
 
-    bytes public bytecode;
-
     function createContract(
-        bytes memory bytecode_
+        bytes memory bytecode
     ) public returns (address addr) {
         assembly {
-            addr := create(0, add(bytecode_, 0x20), mload(bytecode_))
+            addr := create(0, add(bytecode, 0x20), mload(bytecode))
             if and(iszero(addr), not(iszero(returndatasize()))) {
                 let p := mload(0x40)
                 returndatacopy(p, 0, returndatasize())
@@ -46,6 +41,33 @@ contract ERC20Benchmark is StdCheats, Test {
         uint256 totalSupply_,
         address beneficiary_
     ) public returns (IERC20) {
+        // NOTE: to toggle between the gas-reports and the gas-snapshots, comment either of the following expressions
+        return
+            deployBytecodeERC20(
+                name_,
+                symbol_,
+                decimals_,
+                totalSupply_,
+                beneficiary_
+            );
+        // return
+        //     deploySolERC20(
+        //         name_,
+        //         symbol_,
+        //         decimals_,
+        //         totalSupply_,
+        //         beneficiary_
+        //     );
+    }
+
+    function deployBytecodeERC20(
+        string memory name_,
+        string memory symbol_,
+        uint8 decimals_,
+        uint256 totalSupply_,
+        address beneficiary_
+    ) public returns (IERC20) {
+        string memory bytecodePath = vm.envString("BYTECODE_PATH");
         bytes memory params = abi.encode(
             name_,
             symbol_,
@@ -53,47 +75,87 @@ contract ERC20Benchmark is StdCheats, Test {
             totalSupply_,
             beneficiary_
         );
+        bytes memory creationBytecode = abi.encodePacked(
+            vm.getCode(bytecodePath),
+            params
+        );
 
-        bytes memory creationBytecode = abi.encodePacked(bytecode, params);
+        vm.startSnapshotGas("deployment");
+        IERC20 erc20Token = IERC20(createContract(creationBytecode));
+        vm.stopSnapshotGas("deployment");
+        return erc20Token;
+    }
 
-        return IERC20(createContract(creationBytecode));
+    function deploySolERC20(
+        string memory name_,
+        string memory symbol_,
+        uint8 decimals_,
+        uint256 totalSupply_,
+        address beneficiary_
+    ) public returns (IERC20) {
+        vm.startSnapshotGas("deployment");
+        IERC20 erc20Token = IERC20(
+            address(
+                new ERC20(name_, symbol_, decimals_, totalSupply_, beneficiary_)
+            )
+        );
+        vm.stopSnapshotGas("deployment");
+        return erc20Token;
     }
 
     function setUp() public {
-        string memory bytecodePath = vm.envString("BYTECODE_PATH");
-        bytecode = vm.getCode(bytecodePath);
-
         token = deployERC20(name, symbol, decimals, totalSupply, beneficiary);
     }
 
-    function testMetadata() public view {
-        assertEq(token.name(), name);
-        assertEq(token.symbol(), symbol);
-        assertEq(token.decimals(), decimals);
-        assertEq(token.totalSupply(), totalSupply);
-        assertEq(token.balanceOf(beneficiary), totalSupply);
+    function testMetadata() public {
+        string memory gotName = token.name();
+        vm.snapshotGasLastCall("name");
+        assertEq(gotName, name);
+
+        string memory gotSymbol = token.symbol();
+        vm.snapshotGasLastCall("symbol");
+        assertEq(gotSymbol, symbol);
+
+        uint8 gotDecimals = token.decimals();
+        vm.snapshotGasLastCall("decimals");
+        assertEq(gotDecimals, decimals);
+
+        uint256 gotTotalSupply = token.totalSupply();
+        vm.snapshotGasLastCall("totalSupply");
+        assertEq(gotTotalSupply, totalSupply);
+
+        uint256 gotBalance = token.balanceOf(beneficiary);
+        vm.snapshotGasLastCall("balanceOf");
+        assertEq(gotBalance, totalSupply);
     }
 
     function testBurn() public {
         assertEq(token.balanceOf(beneficiary), totalSupply);
         vm.prank(beneficiary);
         token.burn(0.9e18);
+        vm.snapshotGasLastCall("burn");
 
         assertEq(token.totalSupply(), totalSupply - 0.9e18);
         assertEq(token.balanceOf(beneficiary), totalSupply - 0.9e18);
     }
 
     function testApprove() public {
-        assertTrue(token.approve(address(0xBEEF), 1e18));
+        bool res = token.approve(address(0xBEEF), 1e18);
+        vm.snapshotGasLastCall("approve");
+        assertTrue(res);
 
-        assertEq(token.allowance(address(this), address(0xBEEF)), 1e18);
+        uint256 allowed = token.allowance(address(this), address(0xBEEF));
+        vm.snapshotGasLastCall("allowance");
+        assertEq(allowed, 1e18);
     }
 
     function testTransfer() public {
         assertEq(token.balanceOf(beneficiary), totalSupply);
 
         vm.prank(beneficiary);
-        assertTrue(token.transfer(address(0xBEEF), 1e18));
+        bool res = token.transfer(address(0xBEEF), 1e18);
+        vm.snapshotGasLastCall("transfer");
+        assertTrue(res);
         assertEq(token.totalSupply(), totalSupply);
 
         assertEq(token.balanceOf(beneficiary), totalSupply - 1e18);
@@ -110,7 +172,9 @@ contract ERC20Benchmark is StdCheats, Test {
         token.approve(transferer, 1e18);
 
         vm.prank(transferer);
-        assertTrue(token.transferFrom(beneficiary, to, 1e18));
+        bool res = token.transferFrom(beneficiary, to, 1e18);
+        vm.snapshotGasLastCall("transferFrom");
+        assertTrue(res);
         assertEq(token.totalSupply(), totalSupply);
 
         assertEq(token.allowance(beneficiary, transferer), 0);
