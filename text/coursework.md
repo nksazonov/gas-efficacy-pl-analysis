@@ -1994,6 +1994,7 @@ Note, that for clearer comparison, the ERC20 Solidity contract used with the gas
 The results of running a gas-report tool are the following:
 
 <!--
+// TODO: use picture
 ╭---------------------------------------+-----------------+-------+--------+-------+---------╮
 | src/solidity/ERC20.sol:ERC20 Contract |                 |       |        |       |         |
 +============================================================================================+
