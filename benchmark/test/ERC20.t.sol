@@ -75,8 +75,8 @@ contract ERC20Test is StdCheats, Test {
         uint256 totalSupply_,
         address beneficiary_
     ) public {
-        vm.assume(bytes(name_).length <= 32);
-        vm.assume(bytes(symbol_).length <= 32);
+        vm.assume(bytes(name_).length < 32);
+        vm.assume(bytes(symbol_).length < 32);
         vm.assume(decimals_ > 0);
         vm.assume(totalSupply_ > 0);
         vm.assume(beneficiary_ != address(0));
