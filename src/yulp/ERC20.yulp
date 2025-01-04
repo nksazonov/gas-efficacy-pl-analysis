@@ -171,7 +171,7 @@ object "ERC20" is "Utils" {
                 transferCalldata.amount(_calldata))
         }
 
-        case sig"transferFrom(address source, address destination, uint amount) returns (bool success)" {
+        case sig"transferFrom(address source, address destination, uint256 amount) returns (bool success)" {
             mstruct transferFromCalldata(sig: 4, source: 32, destination: 32, amount: 32)
 
             executeTransfer(transferFromCalldata.source(_calldata),
@@ -235,24 +235,24 @@ object "ERC20" is "Utils" {
         stop() // stop execution here..
 
         function executeTransfer(source, destination, amount) {
+            let spender := caller()
             let balanceOfSource := sload(mappingStorageKey(source, Storage.balance))
-            let allowanceOfDestination := sload(mappingStorageKey2(source, destination, Storage.balance))
-            let allowanceOfSourceSender := sload(mappingStorageKey2(source, caller(), Storage.allowance))
+            let allowanceOfSpender := sload(mappingStorageKey2(source, spender, Storage.allowance))
 
             // require(balanceOf[src] >= wad, "insufficient-balance");
             require(or(gt(balanceOfSource, amount), eq(balanceOfSource, amount)))
 
             // if (src != msg.sender && allowance[src][msg.sender] != uint(-1)) {
-            if and(neq(source, caller()), neq(allowanceOfSourceSender, MAX_UINT)) {
+            if and(neq(source, spender), neq(allowanceOfSpender, MAX_UINT)) {
                 // require(allowance[src][msg.sender] >= wad, "insufficient-allowance");
-                require(gte(allowanceOfDestination, amount))
+                require(gte(allowanceOfSpender, amount))
 
                 // allowance[src][msg.sender] = sub(allowance[src][msg.sender], wad);
-                sstore(mappingStorageKey2(source, destination, Storage.balance),
-                    sub(allowanceOfDestination, amount))
+                sstore(mappingStorageKey2(source, spender, Storage.allowance),
+                    sub(allowanceOfSpender, amount))
             }
 
-            //  balanceOf[src] = sub(balanceOf[src], wad);
+            // balanceOf[src] = sub(balanceOf[src], wad);
             sstore(mappingStorageKey(source, Storage.balance),
                 sub(balanceOfSource, amount))
 

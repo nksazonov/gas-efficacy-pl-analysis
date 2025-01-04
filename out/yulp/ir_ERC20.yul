@@ -842,24 +842,24 @@ function allowanceCalldata.owner.position(_pos) -> _offset {
         stop() // stop execution here..
 
         function executeTransfer(source, destination, amount) {
+            let spender := caller()
             let balanceOfSource := sload(mappingStorageKey(source, 4))
-            let allowanceOfDestination := sload(mappingStorageKey2(source, destination, 4))
-            let allowanceOfSourceSender := sload(mappingStorageKey2(source, caller(), 5))
+            let allowanceOfSpender := sload(mappingStorageKey2(source, spender, 5))
 
             // require(balanceOf[src] >= wad, "insufficient-balance");
             require(or(gt(balanceOfSource, amount), eq(balanceOfSource, amount)), 0)
 
             // if (src != msg.sender && allowance[src][msg.sender] != uint(-1)) {
-            if and(neq(source, caller()), neq(allowanceOfSourceSender, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff)) {
+            if and(neq(source, spender), neq(allowanceOfSpender, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff)) {
                 // require(allowance[src][msg.sender] >= wad, "insufficient-allowance");
-                require(gte(allowanceOfDestination, amount), 0)
+                require(gte(allowanceOfSpender, amount), 0)
 
                 // allowance[src][msg.sender] = sub(allowance[src][msg.sender], wad);
-                sstore(mappingStorageKey2(source, destination, 4),
-                    safeSub(allowanceOfDestination, amount))
+                sstore(mappingStorageKey2(source, spender, 5),
+                    safeSub(allowanceOfSpender, amount))
             }
 
-            //  balanceOf[src] = sub(balanceOf[src], wad);
+            // balanceOf[src] = sub(balanceOf[src], wad);
             sstore(mappingStorageKey(source, 4),
                 safeSub(balanceOfSource, amount))
 
