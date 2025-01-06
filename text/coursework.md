@@ -1534,14 +1534,6 @@ Compiler optimizations reduce gas consumption and improve performance, directly 
 - **Optimization Levels**: Compiler flags for optimizing code during compilation.
 - **Gas Optimization**: Specific optimizations aimed at reducing gas consumption.
 
-#### 3.2.13. Compilation Time
-
-The time it takes to compile code affects the development cycle. Faster compilation times allow developers to iterate more quickly, making it easier to test and deploy updates frequently. Long compilation times, on the other hand, can slow down the development process and hinder productivity.
-
-**Values**:
-
-- **Time to Compile**: How fast the compiler generates bytecode from the source code. This will be evaluated based on a sample contract.
-
 ### 3.3. Gas comparison
 
 This section defines the criteria for comparing the gas efficiency of programming languages used in Ethereum smart contract development. Gas consumption directly impacts the cost of deploying and interacting with smart contracts, making optimization crucial for developers. The gas comparison will evaluate how efficiently languages handle various operations, including storage, execution, and error handling. To facilitate this comparison, we will introduce a benchmark smart contract designed to measure gas consumption across different languages and programming patterns. This standardized contract will serve as the basis for assessing the relative gas costs and efficiency of each language in Ethereum environments.
@@ -1796,6 +1788,8 @@ Before the contracts can be benchmarked for gas efficiency, they must be compile
 
 Each bytecode is stored in a "bin" field of a json file with a name, corresponding to a language and optimizations used.
 
+To ease the compilation, a Makefile was created, that can compile all languages with a simple command.
+
 **Solidity**. The Solidity contract is compiled using solc, the Solidity compiler, several times to generate different outputs for comparison.
 
 The compiler can be installed using several methods, including npm, Docker, apt-get, brew, or built from source. https://docs.soliditylang.org/en/v0.8.27/installing-solidity.html
@@ -1976,7 +1970,7 @@ In isolation mode all top-level calls are executed as a separate transaction in 
 Gas benchmarks are run the the following command:
 
 ```bash
-BYTECODE_PATH=../out/<path_to_bytecode> forge test  --isolate ./test/ERC20Benchmark.t.sol
+BYTECODE_PATH=../out/<path_to_bytecode> forge test --isolate ./test/ERC20Benchmark.t.sol
 ```
 
 To ease the benchmarking, a Makefile was created, that can run benchmarks for all languages with a simple command.
@@ -2033,12 +2027,12 @@ The following table shows the gas consumption measurements for the ERC20 token c
 | Function     | Gas report (avg) | Gas report (max)     | Gas snapshots |
 | ------------ | ---------------- | -------------------- | ------------- |
 | deployment   | 749211           | 749211 (same as avg) | 781711        |
-| --           | --               | ---                  | --            |
+| --           | --               | --                   | --            |
 | approve      | 46108            | 46630                | 46102         |
 | transfer     | 37804            | 51582                | 51318         |
 | transferFrom | 35562            | 57557                | 52493         |
 | burn         | 33798            | 33851                | 33803         |
-| --           | --               |                      | --            |
+| --           | --               | --                   | --            |
 | allowance    | 753              | 753                  | 753           |
 | balanceOf    | 1381             | 2580                 | 2580          |
 | decimals     | 249              | 249                  | 249           |
@@ -2053,8 +2047,386 @@ Therefore, the gas snapshots cheatcodes provide a reliable alternative for measu
 
 #### 3.4.2. Cross-language comparison
 
-Mention forge-vyper, forge-yulp, forge-fe integration
+This section presents a comparative analysis of popular programming languages for EVM-based blockchain development: Solidity, Vyper, Fe, Yul, and Yul+. These languages are evaluated against a set of criteria derived from sections 3.2 and 3.3.2. The table below summarizes key features, advantages, and limitations of each language.
+
+The goal of this comparison is to provide developers with a clear understanding of the strengths and weaknesses of each language, enabling informed decisions for smart contract development.
+
+Here’s the revised table based on your provided criteria:
+
+| **Criteria**                        | **Solidity**                                      | **Vyper**                                       | **Fe**                                      | **Yul**                                           | **Yulp**                                      |
+| ----------------------------------- | ------------------------------------------------- | ----------------------------------------------- | ------------------------------------------- | ------------------------------------------------- | --------------------------------------------- |
+| **Type Checking**                   | Statically Typed                                  | Statically Typed                                | Statically Typed                            | None (assembly-like)                              | None (assembly-like)                          |
+| **Type Strength**                   | Strongly Typed                                    | Strongly Typed                                  | Strongly Typed                              | None                                              | None                                          |
+| **Memory Management**               | Automatic (GC)                                    | Automatic (GC)                                  | Automatic (GC)                              | Manual                                            | Manual                                        |
+| **Keywords**                        | Rich set                                          | Minimal                                         | Developing                                  | Minimal                                           | Minimal                                       |
+| **Level of Abstraction**            | High-Level                                        | High-Level                                      | High-Level                                  | Low-Level                                         | Low-Level                                     |
+| **Error Handling**                  | Built-In                                          | Built-In                                        | Built-In                                    | Minimal                                           | Minimal                                       |
+| **Open/Closed Source**              | Open Source, https://github.com/ethereum/solidity | Open Source, https://github.com/vyperlang/vyper | Open Source, https://github.com/ethereum/fe | Open Source, https://github.com/ethereum/solidity | Open Source, https://github.com/FuelLabs/yulp |
+| **Adoption and Community Support**  | Large, Active                                     | Medium, Active                                  | Small, Emerging                             | Small                                             | Small                                         |
+| **Latest Version and Release Date** | 0.8.28, Oct 9 2024                                | 0.4.0, Jun 20 2024                              | 0.26.0, Oct 3 2023                          | 0.8.28, Oct 9 2024                                | 0.2.3, Oct 10 2020                            |
+| **Number of Plugins for IDEs**      | Many                                              | Growing                                         | Few                                         | Minimal                                           | Absent                                        |
+| **Compiler Features**               | Advanced                                          | Strict                                          | Evolving                                    | Limited                                           | Very Limited                                  |
+| **Compiler Optimizations**          | Moderate                                          | High                                            | High                                        | High                                              | High                                          |
+
+##### 3.4.2.1. Keywords comparison
+
+Based on the **Solidity** 0.8.28 documentation, the list of keywords includes:
+
+Data Type Keywords
+
+- uint, uint8, uint16, ..., uint256
+- int, int8, int16, ..., int256
+- bool
+- address
+- bytes, bytes1, ..., bytes32
+- string
+- mapping
+- struct
+- enum
+- true, false
+
+Sub-denomination Keywords
+
+- wei, gwei, ether
+- seconds, minutes, hours, days, weeks, years
+
+Function and Variable Modifiers
+
+- function, constructor, fallback, receive
+- public, private, internal, external
+- view, pure, payable
+- constant, immutable, storage, memory, calldata, transient
+- override, virtual
+- returns, return
+- new, delete
+- modifier
+- \_
+
+Control Flow
+
+- if, else
+- for, while, do, break, continue
+
+Error Handling
+
+- require, assert, revert, error
+- try, catch
+
+Built-In Functions
+
+- abi, keccak256, ecrecover
+- type, block, msg, tx, gasleft
+- self
+
+Other
+
+- pragma, import
+- contract, interface, library, abstract
+- is
+- event, emit, indexed, anonymous
+- unchecked, assembly
+- using, as
+
+Based on the **Vyper** 0.4.0 documentation, here is a comprehensive list of keywords categorized by their functionalities:
+
+Data Type Keywords
+
+- int128, int256
+- uint8, uint16, uint32, uint64, uint128, uint256
+- bool
+- address
+- bytes, bytes32
+- string
+- fixed, ufixed
+- struct
+- mapping
+- array
+
+Function and Variable Modifiers
+
+- external, internal
+- view, pure, payable
+- nonreentrant
+- storage, memory, calldata
+- immutable, constant
+- constructor, fallback, receive
+
+Control Flow
+
+- if, elif, else
+- for, while
+- break, continue
+- pass
+
+Error Handling
+
+- assert, raise
+
+Other
+
+- contract, implements, interface
+- event, log
+- import, from, as
+
+Global Variables and Constants
+
+- msg, block, tx
+- wei, gwei, ether
+- true, false
+- self
+
+Based on the **Fe** 0.26.0 documentation, the keywords are categorized as follows:
+
+Data Types:
+
+- u8, u16, u32, u64, u128, u256
+- i8, i16, i32, i64, i128, i256
+- address
+- bool
+- bytes
+- enum
+- map
+- string
+- struct
+
+Function Definitions and Modifiers:
+
+- fn
+- pub
+- nonpayable
+- payable
+
+Control Structures:
+
+- if, else, elif
+- for, while
+- break, continue
+- match
+- return
+- revert
+
+Error Handling:
+
+- assert
+
+Contract Structure:
+
+- contract
+- event
+- use
+
+Variable Declarations:
+
+- let
+- mut
+- const
+
+Based on the **Yul** documentation, the keywords include:
+
+Code Structure:
+
+- object
+- code
+
+Variable Declarations:
+
+- let
+
+Function Definitions:
+
+- function
+
+Control Flow:
+
+- if
+- switch, case, default
+- for, break, continue
+- leave
+
+Memory Management:
+
+- mload, mstore, mstore8
+- sload, sstore
+- msize
+- calldataload, calldatasize, calldatacopy
+- codesize, codecopy
+- extcodesize, extcodecopy
+- returndatasize, returndatacopy
+
+Contract Execution:
+
+- stop, return, revert
+- selfdestruct
+- call, callcode, delegatecall, staticcall
+- create, create2
+- log0, log1, log2, log3, log4
+
+Built-in Functions:
+
+- keccak256, sha3, sha256, ripemd160, identity
+- gas, address, balance, caller, callvalue
+- blockhash, coinbase, timestamp, number, difficulty, gaslimit, chainid, selfbalance, basefee
+
+Based on the **Yulp** GitHub repository, this language includes all keywords from Yul, with additional features:
+
+Structures:
+
+- mstruct, enum
+
+Types:
+
+- const
+- mslice
+- true, false
+- MAX_UINT
+
+Memory Management:
+
+- mstore(x1, ... , xn)
+
+File-level Directives:
+
+- import
+- is
+
+Built-in Functions:
+
+- sig"..."
+- error"..."
+
+##### 3.4.2.2. Gas consumption comparison
+
+The gas consumption measurements for the ERC20 token contract in Solidity, Vyper, Fe, Yul, and Yulp are presented in the table below. The gas consumption is measured for key operations, including contract deployment, function calls, and view functions. The gas measurements are recorded using the gas snapshots cheatcodes, which provide reliable gas consumption measurements for raw bytecode.
+
+| **Operation**     | **Optimization level**       | **Solidity** | **Vyper**  | **Fe**     | **Yul**    | **Yulp**   |
+| ----------------- | ---------------------------- | ------------ | ---------- | ---------- | ---------- | ---------- |
+| **Bytecode size** | **No optimizations**         | 6969 bytes   | 1967 bytes | 4516 bytes | 2076 bytes | 4099 bytes |
+|                   | **Specific (ir/deployment)** | 3033 bytes   | 1460 bytes | -          | -          | -          |
+|                   | **Runtime**                  | 4011 bytes   | 1524 bytes | -          | 1672 bytes | -          |
+| ----------------- | ---------------------------- | ------------ | ---------- | ---------- | ---------- | ---------- |
+| **Deployment**    | **No optimizations**         | 945_835      | 491_486    | 704_448    | 448_980    | 540_259    |
+|                   | **Specific (ir/deployment)** | 511_132      | 407_943    | -          | -          | -          |
+|                   | **Runtime**                  | 667_598      | 421_159    | -          | 386_247    | -          |
+| ----------------- | ---------------------------- | ------------ | ---------- | ---------- | ---------- | ---------- |
+| **approve**       | **No optimizations**         | 25_298       | 24_313     | 25_011     | 24_755     | 25_146     |
+|                   | **Specific (ir/deployment)** | 24_339       | 24_312     | -          | -          | -          |
+|                   | **Runtime**                  | 24_686       | 24_218     | -          | 24_350     | -          |
+| ----------------- | ---------------------------- | ------------ | ---------- | ---------- | ---------- | ---------- |
+| **transfer**      | **No optimizations**         | 28_645       | 27_394     | 28_691     | 27_843     | 30_625     |
+|                   | **Specific (ir/deployment)** | 27_656       | 27_411     | -          | -          | -          |
+|                   | **Runtime**                  | 27_902       | 27_294     | -          | 27_428     | -          |
+| ----------------- | ---------------------------- | ------------ | ---------- | ---------- | ---------- | ---------- |
+| **transferFrom**  | **No optimizations**         | 29_689       | 28_156     | 32_597     | 28_807     | 29_404     |
+|                   | **Specific (ir/deployment)** | 28_220       | 28_101     | -          | -          | -          |
+|                   | **Runtime**                  | 28_709       | 27_984     | -          | 27_883     | -          |
+| ----------------- | ---------------------------- | ------------ | ---------- | ---------- | ---------- | ---------- |
+| **burn**          | **No optimizations**         | 10_903       | 10_321     | 11_047     | 10_539     | 35_526     |
+|                   | **Specific (ir/deployment)** | 10_263       | 10_266     | -          | -          | -          |
+|                   | **Runtime**                  | 10_539       | 10_149     | -          | 10_209     | -          |
+| ----------------- | ---------------------------- | ------------ | ---------- | ---------- | ---------- | ---------- |
+| **name**          | **No optimizations**         | 3_330        | 4_612      | 11_575     | 2_925      | 4_801      |
+|                   | **Specific (ir/deployment)** | 2_707        | 4_580      | -          | -          | -          |
+|                   | **Runtime**                  | 3_106        | 4_452      | -          | 2_574      | -          |
+| ----------------- | ---------------------------- | ------------ | ---------- | ---------- | ---------- | ---------- |
+| **symbol**        | **No optimizations**         | 3_395        | 4_640      | 11_580     | 2_947      | 4_824      |
+|                   | **Specific (ir/deployment)** | 2_894        | 4_581      | -          | -          | -          |
+|                   | **Runtime**                  | 3_104        | 4_453      | -          | 2_601      | -          |
+| ----------------- | ---------------------------- | ------------ | ---------- | ---------- | ---------- | ---------- |
+| **decimals**      | **No optimizations**         | 427          | 2_418      | 306        | 2_355      | 2_476      |
+|                   | **Specific (ir/deployment)** | 259          | 2_349      | -          | -          | -          |
+|                   | **Runtime**                  | 249          | 2_221      | -          | 2_235      | -          |
+| ----------------- | ---------------------------- | ------------ | ---------- | ---------- | ---------- | ---------- |
+| **totalSupply**   | **No optimizations**         | 2_477        | 2_496      | 2_307      | 2_398      | 2_495      |
+|                   | **Specific (ir/deployment)** | 2_315        | 2_349      | -          | -          | -          |
+|                   | **Runtime**                  | 2_303        | 2_244      | -          | 2_278      | -          |
+| ----------------- | ---------------------------- | ------------ | ---------- | ---------- | ---------- | ---------- |
+| **balanceOf**     | **No optimizations**         | 2_873        | 2_564      | 2_595      | 2_567      | 2_688      |
+|                   | **Specific (ir/deployment)** | 2_574        | 2_450      | -          | -          | -          |
+|                   | **Runtime**                  | 2_580        | 2_333      | -          | 2_395      | -          |
+| ----------------- | ---------------------------- | ------------ | ---------- | ---------- | ---------- | ---------- |
+| **allowance**     | **No optimizations**         | 1_246        | 719        | 748        | 887        | 994        |
+|                   | **Specific (ir/deployment)** | 783          | 559        | -          | -          | -          |
+|                   | **Runtime**                  | 753          | 442        | -          | 617        | -          |
+| ----------------- | ---------------------------- | ------------ | ---------- | ---------- | ---------- | ---------- |
 
 ## Conclusions
+
+### Language Comparison
+
+The comparative analysis highlights significant differences in the design philosophy, usability, and tooling ecosystem of Solidity, Vyper, Fe, Yul, and Yul+, showcasing how each language caters to different developer needs and skill levels.
+Solidity, as the most mature and widely adopted language, offers a multi-paradigm approach with extensive community support and a robust tooling ecosystem. This makes it the go-to choice for developers building smart contracts, particularly those
+seeking versatility and strong integrations with existing Ethereum developer tools. However, its moderate gas optimization capabilities and a relatively complex syntax may pose challenges for developers prioritizing simplicity or efficiency.
+
+Vyper, with its strict procedural paradigm and simplicity-focused syntax, is designed to prioritize security and readability. Its minimalistic approach makes it appealing for projects where contract clarity and auditability are critical,
+such as decentralized finance (DeFi) protocols. However, its smaller community and less mature tooling ecosystem compared to Solidity can be limiting, especially for developers seeking advanced integrations or comprehensive documentation.
+
+Fe is an emerging language that aims to balance simplicity with modern features. While it offers comparable typing discipline and automatic memory management, its smaller community and developing ecosystem currently make it less practical for widespread adoption.
+As Fe matures, it may become a competitive choice for developers seeking an alternative to Solidity or Vyper.
+
+Yul and Yul+ provide low-level programming options for those needing fine-grained control over Ethereum Virtual Machine (EVM) bytecode.
+These languages are best suited for experienced developers focused on maximizing gas efficiency and controlling the compiled output. However, their minimal syntax and lack of high-level abstractions make them less accessible to beginners. The limited community and documentation further emphasize their niche appeal for optimization-focused projects.
+
+### Gas Consumption Comparison
+
+#### Deployment Efficiency
+
+- The most bytecode-efficient language for deployment is **Yul**, with the lowest optimized gas consumption.
+- For languages lacking optimized values (Fe and Yul+), the minimum present value is used as a fallback.
+- Vyper-to-Vyper comparison correctly results in a **0% increase**.
+
+Increase Relative to Most Efficient (Yul)
+
+- Solidity: 72.8%
+- Vyper: 8.0%
+- Fe: (fallback value) 13.0%
+- Yul+: (fallback value) 13.0%
+
+Decrease from "No Optimizations" to Optimized
+
+- Solidity: 29.4%
+- Vyper: 14.3%
+- Fe: (fallback used) 15.2%
+- Yul: 13.9%
+- Yul+: (fallback used) 13.1%
+
+#### Mutable Functions Efficiency
+
+- **Vyper** is the most gas-efficient for mutable functions: `approve`, `transfer`, `transferFrom`, `burn`.
+- Fe and Yul+ fallback to the minimum present values for calculations.
+
+Increase Relative to Most Efficient (Vyper)
+
+- Solidity: 4.7%
+- Vyper: 0.0%
+- Fe: (fallback value) 10.2%
+- Yul+: (fallback value) 12.3%
+
+Decrease from "No Optimizations" to Optimized
+
+- Solidity: 1.5%
+- Vyper: 0.4%
+- Fe: (fallback used) 8.7%
+- Yul: 0.4%
+- Yul+: (fallback used) 9.2%
+
+#### Read Functions Efficiency
+
+- **Vyper** remains the most efficient for read operations such as `name`, `symbol`, and `allowance`.
+- Fe and Yul+ use fallback values for missing optimizations.
+
+Increase Relative to Most Efficient (Vyper)
+
+- Solidity: 8.7%
+- Vyper: 0.0%
+- Fe: (fallback value) 12.0%
+- Yul+: (fallback value) 15.5%
+
+Decrease from "No Optimizations" to Optimized
+
+- Solidity: 4.5%
+- Vyper: 9.6%
+- Fe: (fallback used) 6.7%
+- Yul: 7.6%
+- Yul+: (fallback used) 8.9%
 
 ## References
