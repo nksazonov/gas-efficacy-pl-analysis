@@ -9,8 +9,7 @@ TODO: in English or Ukrainian?
 TODO:
 Document size A pages, B illustrations, C references.
 
-TODO: add keywords and sort alphabetically
-WEB-3, BLOCKCHAIN, GAS OPTIMISATION, GAS EFFICIENCY, PROGRAMMING LANGUAGE, OPCODE, BYTECODE, COMPILATION, SMART CONTRACT, SOLIDITY
+BENCHMARK, BLOCKCHAIN, BYTECODE, COMPILATION, ETHEREUM VIRTUAL MACHINE, FE, FORGE, GAS EFFICIENCY, GAS OPTIMISATION, OPCODE, PROGRAMMING LANGUAGE, SMART CONTRACT, SOLIDITY, VYPER, WEB-3, YUL, YULP
 
 The process of developing smart contracts with different programming languages, further source code compilation into bytecode, and its on-chain execution is an object of research in this paper. The subject of the research is the comparison of different programming languages for smart contract development with focus on gas efficiency of the resulting bytecode.
 
@@ -18,42 +17,13 @@ The main goal is to compare different programming languages for blockchain devel
 
 The research is based on the analysis of the Ethereum Virtual Machine (EVM), its code execution, programming languages for smart contract development, the features of corresponding compilers, and the gas efficiency of the resulting bytecode.
 
-TODO: if have time, add more practical application:
-
-> try to evaluate procedure of rewriting SC to a more gas-efficient language
-> OR
-> rewrite an existing smart contract with more gas-efficient programming language
-
 The results of this research paper describe features of different programming languages for blockchain development, their advantages and disadvantages, and a comparision of gas efficiency of the resulting bytecode.
 
 The research findings can be used by developers to choose the most gas-efficient programming language for blockchain development both prior to the development or for optimisation purposes.
 
 ## Table of contents
 
-TODO: update TOC accordingly to what's written below
-
-- Introduction
-- Chapter 1. Smart contract development
-  - 1.1. Blockchain technology
-  - 1.2. Accounts and Smart contracts
-  - 1.3. Ethereum Virtual Machine
-  - 1.4. Gas
-- Chapter 2. Compilation and EVM bytecode
-  - 2.1. Compilation process
-  - 2.2. EVM bytecode
-- Chapter 3. Blockchain programming languages comparison
-  - 3.1. List of programming languages for blockchain development
-    - 3.1.1. Solidity
-    - 3.1.2. Yul
-    - 3.1.3. TODO: add more languages
-  - 3.2. Criterias for comparison
-  - 3.3. Gas comparison
-    - 3.3.1. Defining the Smart Contract for comparison
-    - 3.3.2. Developing the Smart Contract
-    - 3.3.3. Compiling the Smart Contract
-    - 3.3.4. Benchmarking the resulting bytecode
-- Conclusion
-- References
+TODO: update TOC accordingly
 
 ## Introduction
 
@@ -106,41 +76,41 @@ Moreover, the concept of gas fees extends beyond merely covering computational c
 
 ### 1.1. Blockchain technology
 
-Blockchain technology represents a transformative innovation in digital record-keeping, characterized by its decentralized, transparent, and immutable nature. Unlike traditional centralized systems where a single entity controls data, blockchain operates on a distributed ledger maintained across a network of nodes. This decentralization ensures that no single participant can alter the history of transactions, thereby providing a secure and tamper-resistant platform for various applications. The blockchain's structure, comprising blocks of data linked together in a chronological sequence, underpins its robustness against fraud and data manipulation. Each block contains a list of transactions and is cryptographically secured, making it virtually impossible to alter without the consensus of the network. This inherent security, combined with the transparency of public ledgers, has made blockchain a foundational technology in industries ranging from finance to supply chain management, and most notably, in the development of smart contracts and decentralized applications (DApps).
+Blockchain technology represents a transformative innovation in digital record-keeping, characterized by its decentralized, transparent, and immutable nature. Unlike traditional centralized systems where a single entity controls data, blockchain operates on a distributed ledger maintained across a network of nodes.This decentralization ensures that no single participant can alter the history of transactions, thereby providing a secure and tamper-resistant platform for various applications. The blockchain's structure, comprising blocks of data linked together in a chronological sequence, underpins its robustness against fraud and data manipulation. Each block contains a list of transactions and is cryptographically secured, making it virtually impossible to alter without the consensus of the network. This inherent security, combined with the transparency of public ledgers, has made blockchain a foundational technology in industries ranging from finance to supply chain management, and most notably, in the development of smart contracts and decentralized applications (DApps).
 
 #### 1.1.1. General overview
 
-Blockchain technology, at its core, is a decentralized ledger system that records transactions across a distributed network of computers, known as nodes. This ledger is composed of a series of blocks, each containing a list of transactions, a timestamp, and a cryptographic link to the previous block. The decentralized nature of blockchain ensures that no single entity has control over the entire network, which enhances security, transparency, and resistance to tampering.
+Blockchain is a decentralized ledger system that records transactions across a network of computers (nodes). It consists of blocks containing transactions, timestamps, and cryptographic links to previous blocks. This decentralized design enhances security, transparency, and tamper resistance [1].
 
-Ethereum, one of the most prominent blockchain platforms, extends the basic principles of blockchain beyond simple transaction processing, enabling the execution of smart contracts—self-executing code with the terms of the agreement directly written into lines of code. These contracts run on the Ethereum Virtual Machine (EVM), a decentralized computation engine that interprets and executes the code across the network's nodes. The Ethereum Yellow Paper, authored by Dr. Gavin Wood, provides the formal specification of the Ethereum protocol, detailing the structure, operation, and implementation of the EVM.
+Ethereum expands blockchain beyond simple transactions, enabling smart contracts—self-executing code with terms written directly in it. These run on the Ethereum Virtual Machine (EVM), a decentralized computation engine. The Ethereum Yellow Paper by Dr. Gavin Wood outlines the protocol, including the EVM's structure and operation.
 
-A significant feature of Ethereum is its Turing-complete programming language, which allows developers to create complex logic and execute sophisticated decentralized applications (DApps). This capability distinguishes Ethereum from earlier blockchain implementations, which were typically limited to simple transaction processing and scripting.
+Ethereum's Turing-complete language allows developers to build sophisticated decentralized applications (DApps), distinguishing it from earlier blockchains limited to basic scripting and transactions.
 
-In Ethereum, each transaction and smart contract execution requires computational resources, which are quantified in terms of "gas." Gas serves as the unit of measure for the computational work required to execute operations on the EVM. The gas fee is calculated based on the amount of gas consumed by the operation and the gas price set by the user, which can vary depending on network congestion. This mechanism not only compensates miners or validators for their work but also serves as a deterrent against inefficient or malicious use of the network.
+Transactions and smart contract executions in Ethereum require "gas," a unit measuring computational work. Gas fees depend on consumption and user-set gas prices, deterring inefficiency while compensating miners or validators.
 
-Ethereum's blockchain is maintained through a consensus mechanism, historically based on Proof of Work (PoW) and recently transitioned to Proof of Stake (PoS) with Ethereum 2.0. This upgrade significantly improves the network's scalability and energy efficiency, further solidifying Ethereum's position as a leading platform for decentralized applications and blockchain-based innovation. The technical rigor of Ethereum, as detailed in the Yellow Paper, underscores its foundational role in advancing blockchain technology and its practical applications across various industries.
+Ethereum transitioned from Proof of Work (PoW) to Proof of Stake (PoS) with Ethereum 2.0, improving scalability and energy efficiency. This shift, along with Ethereum's technical rigor detailed in the Yellow Paper, cements its role as a leader in blockchain innovation and decentralized applications [1].
 
 #### 1.1.2. Global state
 
-The concept of the "Global State" in Ethereum is one of the most fundamental and defining features of the platform, meticulously detailed in the Ethereum Yellow Paper. The Global State refers to the entirety of the Ethereum blockchain's current status at any given point in time. It encapsulates all account balances, contract code, and storage, essentially representing the collective "memory" of the network.
+The "Global State" in Ethereum, detailed in the Ethereum Yellow Paper, represents the current status of the blockchain at any point, including account balances, contract code, and storage. It serves as the network's collective "memory" and is maintained across all nodes.
 
-In Ethereum, the Global State is maintained across all nodes in the network, and it evolves over time as transactions are executed. Each transaction results in a state transition, whereby the Global State is modified according to the rules defined by the Ethereum protocol. The state transition function, formally denoted as 𝛾 in the Yellow Paper, is the mechanism that dictates how the state changes in response to a given transaction. This function is deterministic, meaning that given the same initial state and transaction, the resulting state will always be identical, ensuring consistency across the distributed network.
+As transactions are executed, the Global State evolves through state transitions, dictated by the deterministic state transition function (𝛾) defined by the Ethereum protocol. This ensures consistent state changes across the distributed network.
 
-Ethereum's state is composed of multiple components, with each account on the network having its own associated state. There are two types of accounts: externally owned accounts (EOAs) and contract accounts. EOAs are controlled by private keys and are primarily used for sending and receiving Ether. Contract accounts, on the other hand, are controlled by code and can execute predefined actions based on the logic written in their smart contracts. Each account in the Ethereum Global State is identified by a unique address and maintains four critical pieces of information: the nonce, the account’s Ether balance, the contract code (if it’s a contract account), and the storage (a mapping of key-value pairs).
+Ethereum accounts, identified by unique addresses, include externally owned accounts (EOAs) controlled by private keys for Ether transactions, and contract accounts controlled by smart contract code. Each account stores a nonce, balance, contract code (if applicable), and storage.
 
-The Global State is stored in a data structure called a Merkle Patricia Trie, which is a type of modified Merkle tree designed to optimize the retrieval and verification of information. The use of this data structure ensures that any part of the state can be quickly and efficiently retrieved and verified, which is critical for maintaining the integrity and performance of the network. The root of this trie, known as the state root, is stored in the block header, and it provides a cryptographic summary of the entire state at the time the block was mined. This root allows any node in the network to verify the state independently without needing to store the entire blockchain, thus contributing to the decentralized nature of Ethereum.
+The Global State is stored in a Merkle Patricia Trie, enabling efficient retrieval and verification. The state root, stored in the block header, provides a cryptographic summary of the state, allowing nodes to verify it without storing the entire blockchain, supporting Ethereum's decentralized nature [2].
 
-In addition to storing balances and contract data, the Global State also encompasses the entire storage of all smart contracts on the Ethereum blockchain. Each contract has its own storage, which is organized as another Merkle Patricia Trie, allowing for efficient and secure storage of arbitrary data. This hierarchical structure of tries within tries is one of the reasons Ethereum is capable of scaling its state management to accommodate a vast and growing number of smart contracts and decentralized applications (DApps).
+Smart contracts also use their own Merkle Patricia Tries for storage, enabling secure and scalable management of data. This structure supports the growing number of contracts and decentralized applications (DApps).
 
-When a transaction is executed, it can potentially alter the Global State by modifying account balances, invoking smart contracts, or altering the storage associated with a contract account. The execution of a transaction involves the Ethereum Virtual Machine (EVM), which processes the transaction and computes the resulting state transition. The EVM operates on a stack-based architecture and uses gas to measure the computational effort required to execute operations, ensuring that resources are used efficiently and preventing the network from being overwhelmed by costly computations.
+Transactions modify the Global State by altering balances, invoking contracts, or changing contract storage. The Ethereum Virtual Machine (EVM) processes these transactions, computing state transitions with a stack-based architecture and gas to ensure resource efficiency.
 
-The integrity and security of the Global State are upheld through Ethereum’s consensus mechanism. Historically based on Proof of Work (PoW) and now transitioning to Proof of Stake (PoS) with Ethereum 2.0, the consensus mechanism ensures that all nodes agree on the current state of the blockchain. Each new block appended to the blockchain includes a new state root, representing the Global State after all transactions in the block have been processed. Validators or miners, depending on the consensus mechanism, are responsible for validating and proposing these new blocks, thereby ensuring the continuity and immutability of the Ethereum Global State.
+Ethereum's consensus mechanism, historically Proof of Work (PoW) and now Proof of Stake (PoS) with Ethereum 2.0, maintains the integrity and security of the Global State. Each new block includes a state root representing the updated state after processing transactions, ensuring continuity and immutability. Validators or miners validate these blocks, preserving the blockchain's integrity.
 
-#### 1.2.3. Transaction and execution
+#### 1.1.3. Transaction and execution
 
 In Ethereum, transactions are the primary means by which state transitions occur within the blockchain. A transaction, as defined in Section 4.2 of the Ethereum Yellow Paper, is a signed data package that stores a message to be sent from an externally owned account (EOA) to another account on the network. Transactions are the mechanism through which value is transferred and smart contracts are executed, driving the functionality of decentralized applications (DApps) and the broader Ethereum ecosystem.
 
-##### 1.2.3.1 Transaction Structure
+##### 1.1.3.1 Transaction Structure
 
 A transaction in Ethereum contains the following fields, each of which plays a crucial role in the transaction's execution:
 
@@ -154,18 +124,18 @@ A transaction in Ethereum contains the following fields, each of which plays a c
 
 Together, these fields define the parameters and constraints of a transaction, ensuring that it can be validated and executed in a manner consistent with the Ethereum protocol.
 
-##### 1.2.3.2 Transaction Receipt
+##### 1.1.3.2 Transaction Receipt
 
-After a transaction is executed, a transaction receipt is generated, which provides a summary of the transaction’s execution. As detailed in Section 4.4.1 of the Ethereum Yellow Paper, a transaction receipt includes the following fields:
+After a transaction executes, a transaction receipt summarizes its execution, as detailed in Section 4.4.1 of the Ethereum Yellow Paper. It includes:
 
-- Post-Transaction State Root: This is the root of the global state trie after the transaction has been executed. It serves as a cryptographic proof of the new state, allowing anyone to verify the state of the blockchain post-transaction.
-- Cumulative Gas Used: This field records the total amount of gas used in the block up to and including the transaction in question. It provides an insight into the gas consumption of the entire block.
-- Bloom Filter: The bloom filter is a compact data structure that encodes information about the logs generated during the transaction execution. It is used for efficient searching and filtering of logs by decentralized applications and users.
-- Logs: Logs are data records generated during the execution of a transaction, often as a result of events emitted by smart contracts. These logs are not stored on the blockchain but are included in the transaction receipt, allowing for easy retrieval and verification by external applications.
+- Post-Transaction State Root: The root of the global state trie after the transaction, serving as cryptographic proof of the updated state.
+- Cumulative Gas Used: The total gas used in the block up to and including the transaction, showing block-wide gas consumption.
+- Bloom Filter: A compact structure encoding logs for efficient searching and filtering by users and applications.
+- Logs: Data records from transaction execution, often from smart contract events, stored in the receipt for external access.
 
-The transaction receipt thus encapsulates key information about the execution of the transaction, providing both a historical record and a tool for developers and users to analyze and interact with past transactions.
+The transaction receipt provides a historical record and a tool for analyzing and interacting with past transactions.
 
-##### 1.2.3.3 Transaction Execution Process
+##### 1.1.3.3 Transaction Execution Process
 
 The execution of a transaction in Ethereum is a multi-step process that ensures the integrity and consistency of the network, as outlined in Chapter 6 of the Ethereum Yellow Paper. The process can be broken down into three main stages: transaction validation, logic execution, and receipt creation.
 
@@ -183,13 +153,11 @@ The execution of a transaction in Ethereum is a multi-step process that ensures 
 
 3. Receipt Creation: After the transaction is executed, a transaction receipt is generated. This receipt includes the post-transaction state root, cumulative gas used, bloom filter, and logs, as described earlier. The receipt is then stored on the blockchain, providing a permanent record of the transaction's outcome.
 
-The entire transaction execution process is governed by the Ethereum consensus mechanism, ensuring that all nodes in the network reach agreement on the validity and results of each transaction. This robust and meticulous process, as detailed in the Yellow Paper, is foundational to Ethereum’s security, consistency, and trustworthiness as a decentralized platform.
-
-#### 1.2.4. Gas fees
+#### 1.1.4. Gas fees
 
 Gas fees are a fundamental component of the Ethereum network, serving as the mechanism by which computational resources are measured and compensated. In Ethereum, every operation performed by the Ethereum Virtual Machine (EVM), whether it's executing a smart contract, sending a transaction, or performing data storage, requires a certain amount of computational work. Gas is the unit of measurement used to quantify this work, and gas fees are the cost that users must pay to execute these operations on the network.
 
-##### 1.2.4.1. Components of Gas Fees
+##### 1.1.4.1. Components of Gas Fees
 
 The gas fee for a transaction is determined by several factors, as detailed in Section 5 of the Ethereum Yellow Paper:
 
@@ -199,7 +167,7 @@ The gas fee for a transaction is determined by several factors, as detailed in S
 
 3. Gas Price: The gas price is the amount of Ether the sender is willing to pay per unit of gas. This value is set by the sender and is typically measured in gwei (1 gwei = 10^-9 Ether). The gas price can fluctuate based on network demand, with higher prices offering an incentive for miners or validators to prioritize the transaction. The total gas fee paid by the sender is the product of the gas used and the gas price.
 
-##### 1.2.4.2. Gas Fees Calculation
+##### 1.1.4.2. Gas Fees Calculation
 
 The total gas fee for a transaction is calculated as follows:
 
@@ -219,7 +187,7 @@ For instance, if a transaction consumes 21,000 units of gas (a typical value for
 21,000 × 20 gwei = 420,000 gwei = 0.00042 Ether
 ```
 
-##### 1.2.4.3. Intrinsic Gas Cost
+##### 1.1.4.3. Intrinsic Gas Cost
 
 The intrinsic gas cost is the base cost for executing a transaction, and it is composed of several elements:
 
@@ -229,11 +197,9 @@ The intrinsic gas cost is the base cost for executing a transaction, and it is c
 
 3. Operation-Specific Costs: Certain operations within a transaction, such as creating a new contract or invoking specific EVM opcodes, have additional gas costs associated with them. These costs are predefined in the Ethereum protocol to reflect the relative computational intensity of each operation.
 
-##### 1.2.4.4. Gas Refunds and Efficiency
-
 Ethereum also provides mechanisms for optimizing gas usage and potentially receiving gas refunds. For example, if a transaction deletes a contract or clears storage, gas can be refunded to the sender, reducing the overall cost of the transaction. This incentivizes developers to write more efficient smart contracts, as unnecessary data and operations can significantly increase gas costs.
 
-##### 1.2.4.5. Economic and Network Implications
+##### 1.1.4.4. Economic and Network Implications
 
 Gas fees play a critical role in the economics of the Ethereum network. They incentivize miners or validators to include transactions in the blockchain and help prevent network abuse by imposing a cost on every operation. High gas fees during periods of network congestion can serve as a natural deterrent to excessive or unnecessary transactions, while also reflecting the scarcity of computational resources on the network.
 
@@ -241,66 +207,41 @@ In conclusion, gas fees are a sophisticated mechanism that balances the computat
 
 #### 1.1.5. Blocks
 
-In Ethereum, the blockchain is composed of a series of blocks, each containing a collection of transactions and serving as a snapshot of the network’s state at a specific point in time. The structure of an Ethereum block, as detailed in Section 4.3 of the Ethereum Yellow Paper, is fundamental to the operation of the network, ensuring that transactions are recorded in a secure, immutable, and orderly manner.
+Ethereum’s blockchain is a series of blocks, each capturing transactions and the network's state. Blocks consist of:
 
-An Ethereum block is composed of two primary parts: the block header and the block body.
+1. Block Header: Contains metadata like:
 
-1. Block Header: The block header contains critical metadata about the block, which includes:
+- Parent Hash: Links to the previous block for continuity and security.
+- Uncle Hash: References "uncle" blocks to reward miners and improve security.
+- State Root: Cryptographic proof of the global state post-transactions.
+- Transactions Root: Efficiently verifies transactions.
+- Receipts Root: Enables quick access to transaction outcomes.
+- Logs Bloom: Summarizes logs for easy search.
+- Difficulty: Adjusts PoW complexity for consistent block mining.
+- Number: Indicates block position.
+- Gas Limit/Used: Defines and tracks transaction gas usage.
+- Timestamp: Records when the block was mined.
+- Extra Data: Optional 32-byte custom field.
+- Mix Hash/Nonce: Used in the PoW algorithm.
 
-   - Parent Hash: This field contains the hash of the previous block's header, linking the current block to its predecessor and forming the continuous chain of blocks that constitutes the blockchain. This linkage ensures that any alteration to a previous block would invalidate the subsequent blocks, thereby securing the integrity of the blockchain.
-   - Uncle Hash: Ethereum allows for the inclusion of "uncle" blocks—blocks that were mined concurrently but did not become part of the main chain. The uncle hash is a hash of the list of uncle blocks included in the current block, which helps improve chain security and rewards miners for their work.
-   - State Root: The state root is the root hash of the Merkle Patricia Trie that represents the global state of Ethereum after all transactions in the block have been executed. This root serves as a cryptographic proof of the network’s state at the time the block was mined.
-   - Transactions Root: This is the root hash of the Merkle Trie containing all transactions included in the block. The transactions root allows for efficient verification and retrieval of transactions.
-   - Receipts Root: Similar to the transactions root, the receipts root is the root hash of the Merkle Trie containing all transaction receipts. It enables efficient access to the results and logs generated by the transactions.
-   - Logs Bloom: This is a bloom filter that summarizes all the logs generated by transactions in the block, allowing for efficient searching and filtering of specific events.
-   - Difficulty: The difficulty value adjusts the complexity of the Proof of Work (PoW) algorithm, ensuring that blocks are mined at a consistent rate, despite variations in the network's computational power.
-   - Number: This is the block number, which indicates the position of the block within the blockchain. The genesis block, being the first block, has a block number of zero.
-   - Gas Limit and Gas Used: The gas limit sets the maximum amount of gas that can be consumed by transactions in the block, while gas used reflects the total gas consumed by all transactions within the block.
-   - Timestamp: This field records the time at which the block was mined, providing a chronological order to the blockchain.
-   - Extra Data: An optional field that can contain up to 32 bytes of arbitrary data, often used for custom purposes by miners.
-   - Mix Hash and Nonce: These fields are used in the Proof of Work (PoW) algorithm, with the mix hash representing the proof-of-work solution, and the nonce being the value that miners adjust to find a valid hash.
+2. Block Body:
 
-2. Block Body: The block body contains two main elements:
-   - Transaction List: This is the list of all transactions included in the block. Each transaction in this list contributes to the state transition from the state of the previous block to the new state.
-   - Uncles: The block body also includes a list of uncle blocks, which are valid blocks that were mined almost simultaneously with the parent block but did not become part of the main chain. Including uncles helps to improve network security by rewarding miners who contribute to the network, even if their blocks do not become part of the main chain.
+- Transaction List: Transactions transitioning the state.
+- Uncles: Near-simultaneously mined blocks improving security.
 
-Blocks in Ethereum are cryptographically linked together to form the blockchain. This linkage is achieved through the parent hash field in each block header, which points to the hash of the previous block. This creates a continuous chain from the current block back to the genesis block. The use of cryptographic hashes ensures that any modification to the data in a previous block would result in a different hash, breaking the chain and alerting the network to the tampering.
-
-The process of adding new blocks to the blockchain is governed by Ethereum's consensus mechanism, historically Proof of Work (PoW) and now transitioning to Proof of Stake (PoS) with Ethereum 2.0. In PoW, miners compete to solve complex mathematical puzzles, and the first to find a solution can propose a new block. In PoS, validators are chosen to propose new blocks based on the amount of Ether they have staked. Regardless of the consensus mechanism, once a block is added to the blockchain, it becomes a permanent part of the ledger, contributing to the immutability and security of the Ethereum network.
-
-This structured and linked block design ensures that Ethereum maintains a consistent and secure record of all transactions and state changes, enabling the decentralized operation of smart contracts and applications across the network.
+Blocks are cryptographically linked via the parent hash, ensuring tamper resistance. Block addition follows Ethereum’s consensus mechanism: PoW (miners solving puzzles) or PoS (validators staking Ether). Once added, blocks are immutable, securing Ethereum’s transaction and state history, supporting decentralized apps and smart contracts.
 
 #### 1.1.6. Consensus algorithms and block finalization
 
 Consensus algorithms are the mechanisms that allow distributed networks like Ethereum to agree on the state of the blockchain, ensuring that all participants maintain a consistent and secure ledger without a central authority. In Ethereum, two primary consensus algorithms have been employed: Proof of Work (PoW) and Proof of Stake (PoS), each with its own method of securing the network and achieving consensus.
 
-##### 1.1.6.1 Proof of Work (PoW)
-
-Historically, Ethereum utilized Proof of Work (PoW), the same consensus mechanism used by Bitcoin. In PoW, miners compete to solve complex cryptographic puzzles, where the first to find a valid solution is granted the right to propose a new block. The difficulty of these puzzles adjusts dynamically to maintain a consistent block time, typically around 15 seconds in Ethereum. PoW's security comes from the immense computational effort required to solve these puzzles, making it prohibitively expensive for any single entity to take control of the network. However, PoW is also energy-intensive and has scalability limitations, which prompted the transition to Proof of Stake.
-
-##### 1.1.6.2. Proof of Stake (PoS)
-
 Proof of Stake (PoS) is the consensus algorithm introduced with Ethereum 2.0, designed to address the limitations of PoW. In PoS, validators are chosen to propose and attest to new blocks based on the amount of Ether they have staked as collateral. This staking process replaces the need for energy-intensive computations, significantly reducing the environmental impact of securing the network. Validators are incentivized to act honestly by the potential loss of their staked Ether if they attempt to undermine the network. PoS also enables more efficient scalability and faster finalization times, making it a more sustainable solution for Ethereum’s long-term growth.
 
-##### 1.1.6.3. Block Finalization
-
-Block finalization refers to the point at which a block is considered permanently included in the blockchain, meaning that it cannot be altered or removed without the consensus of the entire network. In PoW, finalization is probabilistic; the more blocks that are added on top of a given block, the more secure it becomes, reducing the likelihood of a reorganization (or "reorg") that would remove it. Traditionally, a block is considered final after six subsequent blocks, often referred to as the "6 confirmations" rule.
+Block finalization refers to the point at which a block is considered permanently included in the blockchain, meaning that it cannot be altered or removed without the consensus of the entire network. Traditionally, a block is considered final after six subsequent blocks, often referred to as the "6 confirmations" rule.
 
 In PoS, finalization is more deterministic and is achieved through a process known as checkpointing. Validators periodically vote on the state of the blockchain at certain intervals (epochs). When two-thirds of the validators agree on a checkpoint, all preceding blocks up to that checkpoint are considered finalized. This mechanism not only enhances security by preventing reorgs but also speeds up the finalization process, providing faster guarantees that transactions included in these blocks are immutable.
 
-The transition from PoW to PoS in Ethereum represents a significant evolution in blockchain consensus, offering improvements in energy efficiency, scalability, and finality. This duality of consensus mechanisms highlights Ethereum’s commitment to innovation and its adaptability to the growing demands of decentralized applications and global adoption.
-
-#### 1.1.7. EIPs and ERCs
-
-Ethereum Improvement Proposals (EIPs) and Ethereum Request for Comments (ERCs) are essential mechanisms for proposing, discussing, and implementing changes to the Ethereum protocol and its ecosystem. EIPs serve as formal documents that outline new features, enhancements, or processes for the Ethereum network, covering a broad range of topics from core protocol changes to application standards and network upgrades.
-
-EIPs are categorized based on their scope and impact. Core EIPs, for example, propose changes that directly affect the consensus layer of Ethereum, such as modifications to the Ethereum Virtual Machine (EVM) or changes to the consensus algorithm. Network upgrades like "The Merge" or "EIP-1559," which introduced a new fee-burning mechanism, are driven by Core EIPs. The process for an EIP involves rigorous discussion, testing, and community feedback before it can be accepted and implemented into the Ethereum mainnet.
-
-ERCs, on the other hand, are a subset of EIPs focused on application-level standards, particularly those related to smart contracts and tokens. The most famous ERC is ERC-20, which defines a standard for fungible tokens and has become the foundation for countless tokens on Ethereum. Similarly, ERC-721 defines the standard for non-fungible tokens (NFTs), enabling the creation of unique digital assets.
-
-Both EIPs and ERCs are community-driven, emphasizing Ethereum's decentralized ethos. They allow developers, users, and stakeholders to collaborate on the network’s evolution, ensuring that Ethereum remains adaptable and innovative. By enabling structured and transparent changes, EIPs and ERCs play a crucial role in shaping the future of Ethereum, fostering a vibrant ecosystem of decentralized applications and services.
-
-#### 1.1.8. Clients
+#### 1.1.7. Clients
 
 In the Ethereum network, clients, also known as nodes, are software implementations that enable participants to interact with the blockchain. Execution clients are responsible for executing smart contracts, validating transactions, maintaining the network’s state, and ensuring consensus across the distributed network. These clients provide the necessary infrastructure for developers, miners, validators, and users to access and engage with Ethereum.
 
@@ -334,51 +275,36 @@ Each Ethereum address, whether associated with an EOA or an SC, contains several
 
 4. CodeHash: Also specific to smart contracts, the CodeHash field contains the hash of the contract’s code. This hash enables the network to efficiently verify the contract’s code during execution without storing the actual code in the address field.
 
-These fields collectively define the state and capabilities of each Ethereum address, ensuring that all transactions and contract executions are handled securely and efficiently within the network.
-
 #### 1.2.2. Contract creation
 
-Contract creation in Ethereum is a specialized transaction type that results in the deployment of a new smart contract on the blockchain. This process follows a defined sequence, as outlined in Section 7 of the Ethereum Yellow Paper, ensuring that the contract is properly initialized and integrated into the Ethereum network.
+Contract creation in Ethereum is a transaction type that deploys a new smart contract. As detailed in Section 7 of the Ethereum Yellow Paper, this process ensures proper initialization and integration into the network.
 
-While Externally Owned Accounts (EOAs) are the most common initiators of contract creation transactions, it is important to note that smart contracts themselves can also create new contracts. This capability allows for complex, multi-contract systems where contracts deploy or interact with other contracts autonomously, enhancing the flexibility and programmability of the Ethereum platform.
+Both Externally Owned Accounts (EOAs) and smart contracts can create contracts, enabling autonomous, multi-contract systems for enhanced flexibility.
 
-When an EOA or another smart contract initiates a contract creation transaction, the transaction's "To" field is left empty, indicating the intention to create a new contract. The transaction must include a data field containing the contract's initialization code, which is responsible for setting up the contract's initial state.
+During contract creation, the transaction’s "To" field is empty, and the data field contains initialization code to set up the contract’s state. The steps include:
 
-The sequence of events for contract creation is as follows:
+- Transaction Initiation: An account sends a transaction with initialization code, gas, and validation checks (e.g., funds, nonce).
+- Address Generation: The contract address is deterministically generated from the sender’s address and nonce.
+- Initialization Code Execution: The EVM runs the code, consuming gas, and stores the resulting runtime bytecode in the contract’s CodeHash.
+- Storage Setup: The initialization code sets up initial storage, managed via a Merkle Patricia Trie.
+- Contract Finalization: The contract’s address, code, and storage are recorded on the blockchain, with unused gas refunded.
 
-1. Transaction Initiation: The initiating account (EOA or smart contract) sends a transaction with the "To" field empty, the data field containing the contract’s initialization code, and a specified amount of gas. The transaction undergoes validation, ensuring the sender has sufficient funds, the nonce is correct, and in the case of smart contracts, that the execution context is valid.
-
-2. Address Generation: The address for the new contract is generated deterministically based on the sender’s address and the sender's nonce. This ensures that each contract created by the same sender (whether an EOA or a smart contract) has a unique address.
-
-3. Execution of Initialization Code: The Ethereum Virtual Machine (EVM) executes the contract's initialization code. During this process, the EVM may consume gas as it processes the instructions in the code. The output of this code execution, which is typically the runtime bytecode, is stored in the contract’s CodeHash field.
-
-4. Storage Setup: The initialization code may also set up the contract’s initial storage, which is represented by the Storage Root in the contract account. This storage is managed via a Merkle Patricia Trie, allowing for efficient retrieval and updates.
-
-5. Contract Finalization: Once the initialization code has been executed and the contract’s code and storage have been set, the contract is officially created. The contract's address, CodeHash, and initial storage are recorded on the blockchain, and any remaining gas is refunded to the sender.
-
-6. Deployment: The contract is now live on the Ethereum network, and its address can be used to interact with it through subsequent transactions. The contract operates autonomously, executing its code whenever it receives transactions that trigger its functions.
-
-This sequence ensures that smart contracts, whether created by EOAs or other smart contracts, are deployed consistently and securely, maintaining the integrity and reliability of the Ethereum blockchain.
+This process ensures consistent and secure deployment of contracts, whether initiated by EOAs or other smart contracts, preserving Ethereum's integrity.
 
 #### 1.2.3. Message call
 
-A message call in Ethereum refers to the process by which an account, whether an Externally Owned Account (EOA) or a smart contract, interacts with another smart contract or sends Ether to another account. Unlike a transaction, which originates from an EOA and creates a new state on the blockchain, a message call is an internal process that may not necessarily create new blocks but can lead to state changes within the Ethereum Virtual Machine (EVM).
+A message call in Ethereum allows an account (EOA or smart contract) to interact with another contract or send Ether. Unlike transactions, message calls are internal processes that may not create new blocks but can alter the EVM state.
 
-The sequence of steps for a message call, as described in Section 8 of the Ethereum Yellow Paper, is as follows:
+Key steps in a message call, per Section 8 of the Ethereum Yellow Paper:
 
-1. Initiation: A message call is initiated by an account, either an EOA via a transaction or a smart contract as part of its execution. The message includes key parameters such as the recipient address, the amount of Ether to be transferred (if any), the input data, and the gas limit allocated for the call.
+- Initiation: Triggered by an EOA via a transaction or a smart contract during execution, specifying the recipient, Ether amount, input data, and gas limit.
+- Recipient: The recipient address may be an EOA or smart contract. For contracts, the call can trigger code execution.
+- Gas Allocation: Gas allocated limits computation. If gas runs out, the call fails, and state changes are reverted.
+- Code Execution: If the recipient is a contract, the EVM executes its code using the input data, enabling operations like storage updates, sending Ether, or further calls.
+- Return Data: Results, confirmations, or error messages are returned to the caller after execution.
+- Finalization: On success, state changes are committed, and unused gas is refunded. On failure, all changes (except gas used) are reverted.
 
-2. Recipient Address: The recipient of the message call is specified by an address, which can correspond to either an EOA or another smart contract. If the recipient is a smart contract, the message call may trigger the execution of the contract’s code.
-
-3. Gas Allocation: A portion of the gas provided for the transaction or the parent execution context is allocated to the message call. This gas allocation determines how much computation the recipient contract can perform. If the gas runs out during execution, the message call fails, and all state changes are reverted, except for the gas consumed up to that point.
-
-4. Code Execution: If the recipient is a smart contract, the EVM loads the contract’s code from the blockchain and begins execution. The input data provided in the message call is used as the input for the contract’s functions. The contract can perform various operations, including reading and writing to storage, sending Ether, or making further message calls to other contracts.
-
-5. Return Data: Upon completion of the code execution, the contract returns data, which is then passed back to the calling account or contract. This data could be a simple confirmation of success, a computation result, or an error message if the call failed.
-
-6. Finalization: The message call finalizes by either succeeding or failing. If it succeeds, the state changes made during execution are committed to the blockchain, and any unused gas is refunded. If it fails, all state changes are reverted, except for the gas used.
-
-Message calls are fundamental to the interaction between contracts within the Ethereum network, enabling the execution of complex, decentralized applications that can dynamically interact with each other.
+Message calls enable dynamic interactions between contracts, supporting Ethereum’s decentralized applications.
 
 ### 1.3. Bytecode
 
@@ -477,24 +403,6 @@ In EVM, each operation has its own number, therefore the short name - "opcode" (
 
 Detailed information about each opcode can be found in Appendix TODO:.
 
-It is worth noting that some of the opcodes read data from the bytecode itself, rather than the stack. These include the PUSH1...PUSH32 opcodes, which push a constant value to the stack.
-
-All the opcodes are divided into groups based on their functionality. These groups include:
-
-- 0s - Stop and Arithmetic Operations
-- 10s - Comparison & Bitwise Logic Operations
-- 20s - KECCAK256
-- 30s - Environmental Information
-- 40s - Block Information
-- 50s - Stack, Memory, Storage and Flow Operations
-- 5f, 60s and 70s - Push Operations
-- 80s - Duplication Operations
-- 90s - Exchange Operations
-- a0s - Logging Operations
-- f0s - System operations
-
-The numeration of the opcodes is not continuous, as some numbers are reserved for future use.
-
 #### 1.4.4. Fees overview
 
 In EVM, gas fees are charged in three specific scenarios, each being a prerequisite for executing an operation. The first and most common scenario involves the intrinsic gas cost associated with the computation required for the operation (opcode) itself.
@@ -507,28 +415,6 @@ Storage fees operate under a slightly different model. To encourage efficient st
 In fact, this refund is effectively provided up front because the initial cost of using a storage location is significantly higher than that of ongoing usage. This design incentivizes developers to clear unused storage, helping manage the overall blockchain state size.
 
 The gas cost of an operation is calculated as the sum of the intrinsic gas cost, possible gas cost of passing arguments to instruction, as well as memory access, either cold or warm.
-Ethereum Yellow Paper divides opcodes into such groups based on their gas cost:
-
-- W_zero = {STOP, RETURN, REVERT}
-- W_base = {ADDRESS, ORIGIN, CALLER, CALLVALUE, CALLDATASIZE, CODESIZE, GASPRICE, COINBASE, TIMESTAMP, NUMBER, PREVRANDAO, GASLIMIT, CHAINID, RETURNDATASIZE, POP, PC, MSIZE, GAS, BASEFEE, PUSH0}
-- W_verylow = {ADD, SUB, NOT, LT, GT, SLT, SGT, EQ, ISZERO, AND, OR, XOR, BYTE, SHL, SHR, SAR, CALLDATALOAD, MLOAD, MSTORE, MSTORE8, PUSH1, ..., PUSH32, DUP*, SWAP*}
-- W_low = {MUL, DIV, SDIV, MOD, SMOD, SIGNEXTEND, SELFBALANCE}
-- W_mid = {ADDMOD, MULMOD, JUMP}
-- W_high = {JUMPI}
-- W_copy = {CALLDATACOPY, CODECOPY, RETURNDATACOPY}
-- W_extaccount = {BALANCE, EXTCODESIZE, EXTCODEHASH}
-- W_call = {CALL, CALLCODE, DELEGATECALL, STATICCALL}
-
-with the following gas costs:
-
-- G_zero = 0
-- G_base = 2
-- G_verylow = 3
-- G_low = 5
-- G_mid = 8
-- G_high = 10
-- G_copy = G_verylow + 3 \* rounddown(stack[2] / 32)
-- G_extaccount = 100, if an account being accessed is "warm", 2600 if "cold"
 
 More detailed information about gas costs for each opcode is presented in Appendix TODO:.
 
@@ -569,8 +455,6 @@ until either the system is in an exceptional halting state, which discards all c
 
 In Ethereum, gas fees are the fundamental mechanism that ensure fair compensation for computational resources consumed by smart contracts and transactions. As explained in the previous subchapter, users pay gas fees to cover the costs of various operations performed by the Ethereum Virtual Machine (EVM). These fees are required for executing opcodes, storing data, and interacting with the blockchain. To optimize the efficiency of smart contracts and minimize costs, it is essential to understand the key sources of gas consumption.
 
-#### 1.5.1. Main Sources of Gas Fees
-
 1. Computation: The EVM performs numerous operations during contract execution, each represented by an opcode. Some opcodes are computationally expensive, consuming significant gas, while others are relatively lightweight. Appendix G of the Ethereum Yellow Paper defines the gas cost for each opcode, with the following consuming the most gas:
 
 - `EXP` (`0x0A`): Exponentiation is one of the most gas-intensive operations, with a base cost of 10 gas and an additional cost of 50 gas for every byte in the exponent.
@@ -584,8 +468,6 @@ In Ethereum, gas fees are the fundamental mechanism that ensure fair compensatio
 2. Memory and Stack Usage: While operations involving memory and the stack are less expensive than storage operations, they still contribute to gas consumption. Operations like MLOAD (3 gas) and MSTORE (3 gas) cost relatively little, but inefficient memory management can accumulate costs over many operations.
 
 3. External Interactions: Interacting with external contracts or sending Ether through CALL or CREATE incurs substantial gas fees. Each call requires gas for both the base operation and the execution of the called contract, making contract-to-contract interactions one of the primary fee sources.
-
-#### 1.5.2. Fee Optimization Considerations
 
 Smart contract developers must carefully manage gas costs to optimize their contract’s performance and affordability. Reducing interactions with storage, minimizing computationally expensive operations, and efficiently managing memory are all key strategies for lowering gas consumption. Furthermore, gas refunds can be earned by deleting storage variables using the SSTORE opcode, which refunds part of the gas used, incentivizing more efficient use of the blockchain's resources.
 
@@ -603,261 +485,23 @@ While all programming languages share a common goal—enabling human interaction
 
 #### 2.1.2. Key Features of Programming Languages
 
-##### 2.1.2.1. Paradigms
+Programming languages possess several key features that define their behavior, usability, and suitability for different tasks. These features include paradigms, typing discipline, syntax and semantics, memory management, compilation model, concurrent support, level of abstraction, and error handling.
 
-Programming paradigms define the style or methodology used to structure and develop programs. They represent different ways to approach problem-solving in programming, and languages often support one or more paradigms.
+Paradigms: Programming paradigms influence how problems are structured and solved in a language. Procedural languages organize logic into step-by-step instructions (e.g., C), while object-oriented languages focus on classes and objects (e.g., Java, Python). Functional programming emphasizes immutability and mathematical function evaluation (e.g., Haskell), and logic programming uses facts and rules for inference (e.g., Prolog). Many modern languages support multiple paradigms.
 
-**Procedural Paradigm**. In procedural languages, code is organized into procedures or functions. These functions consist of a sequence of statements that are executed step-by-step. For example, C and Fortran are classical procedural languages.
+Typing Discipline: Typing determines how a language handles data types. Statically typed languages check types at compile-time (e.g., Java), while dynamically typed languages infer types at runtime (e.g., Python). Strongly typed languages enforce strict type rules, while weakly typed ones allow implicit type conversions. Some languages, like TypeScript, enhance type safety in traditionally weakly typed environments.
 
-Procedural languages emphasize control flow, where the program's logic follows a defined sequence of operations.
+Syntax and Semantics: Syntax governs how code is written, while semantics define its behavior during execution. Languages like Python prioritize readability with clear and simple syntax, while others like Perl offer flexibility. Semantics vary across languages, with similar constructs often carrying different meanings (e.g., assignment in Python vs. Haskell).
 
-**Object-Oriented Paradigm**. Object-Oriented Programming (OOP) organizes programs into classes and objects. Objects represent real-world entities, and classes define their properties and behavior. OOP languages, such as Java, C++, and Python, use concepts like inheritance, polymorphism, and encapsulation.
+Memory Management: Efficient memory management is critical for performance and reliability. Manual management (e.g., C) gives developers control but risks issues like memory leaks, while automatic garbage collection (e.g., Java) simplifies memory handling at the cost of potential overhead. Techniques like reference counting and ownership rules (e.g., Rust) further diversify memory management approaches.
 
-**Functional Paradigm**. Functional programming treats computation as the evaluation of mathematical functions. It emphasizes immutability and avoids changing state or mutable data. Haskell and Lisp are pure functional languages, while Python, JavaScript, and C# have functional programming features.
+Compilation Model: Languages differ in how they transform source code into executable form. Compiled languages (e.g., C++) generate optimized machine code for high performance. Interpreted languages (e.g., Python) execute code line-by-line for flexibility but slower execution. Hybrid models like JIT (e.g., Java) and AOT (e.g., Swift) balance these trade-offs.
 
-Functional languages favor higher-order functions and recursion over loops.
+Concurrent Support: Concurrency allows programs to perform tasks simultaneously. Multithreading (e.g., Java) enables parallel execution, while asynchronous programming (e.g., JavaScript) handles tasks like I/O efficiently. Lightweight alternatives like coroutines (e.g., Python) facilitate cooperative multitasking.
 
-**Logic Paradigm**. Logic programming focuses on defining facts and rules to solve problems through logical inference. Prolog is a common language in this paradigm.
-This example defines simple facts about who likes certain foods, and Prolog can infer relationships based on these facts.
+Level of Abstraction: High-level languages (e.g., Python) abstract hardware details, prioritizing ease of use, while low-level languages (e.g., C) provide fine control over resources. Mid-level languages (e.g., C++) blend these approaches, offering flexibility and performance.
 
-**Declarative Paradigm**. In declarative programming, the programmer specifies what the program should achieve, rather than how it should do so. SQL is a classic example of a declarative language:
-
-```sql
-SELECT name, age FROM users WHERE age > 30;
-```
-
-Here, the query declares what data the user wants without specifying the procedure for retrieving it.
-
-Many modern languages support multiple paradigms. For example, Python supports procedural, object-oriented, and functional paradigms, while JavaScript supports both functional and object-oriented styles. Each paradigm offers unique advantages, making certain types of problems easier to solve using a specific approach.
-
-##### 2.1.2.2. Typing Discipline
-
-Typing discipline refers to how a programming language handles data types, and it influences error prevention, performance, and code maintainability. There are two primary distinctions: static vs. dynamic typing and strong vs. weak typing.
-
-**Static Typing**. In statically typed languages, variable types are known and checked at compile-time. This ensures that errors related to type mismatches are caught early, before the program runs. Examples of statically typed languages include Java, C, and Rust. A simple type declaration in Java looks like this:
-
-```java
-int age = 30;
-```
-
-If you try to assign a string to age, the program will not compile, catching the error early:
-
-```java
-int age = "thirty"; // Error: incompatible types
-```
-
-**Dynamic Typing**. Dynamically typed languages perform type checking at runtime. This means variable types are inferred when the code is executed, allowing for greater flexibility. However, errors related to types may only surface when the program is run, which can sometimes lead to runtime errors. Examples of dynamically typed languages are Python, JavaScript, and Ruby:
-
-```python
-age = 30
-age = "thirty" # No immediate error, only at runtime if misused
-```
-
-**Strong Typing**. Strongly typed languages strictly enforce type rules, prohibiting implicit conversions between incompatible types. In Python, for example, you cannot automatically concatenate a string and an integer:
-
-```python
-age = 30
-print("Age: " + age) # TypeError: can only concatenate str (not "int") to str
-```
-
-The same in JavaScript, a weakly typed language, would be allowed.
-
-**Weak Typing**. Weakly typed languages allow implicit conversions between types, sometimes leading to unexpected behavior. JavaScript, for instance, is weakly typed and will coerce types automatically:
-
-```javascript
-let result = 5 + "5"; // Output: "55"
-```
-
-This flexibility can be convenient but also prone to subtle bugs if not handled carefully.
-
-Languages like TypeScript (a superset of JavaScript) add static typing to a dynamically typed, weak language, providing type safety while retaining JavaScript’s flexibility. Another example is C++, which is statically and weakly typed, allowing implicit type conversions between some types but enforcing strict type compatibility for others.
-
-##### 2.1.2.3. Syntax and Semantics
-
-The syntax of a programming language refers to its set of rules that define how programs should be written, while semantics deals with the meaning or behavior of the code when executed. These two aspects help define the readability, learnability, and usability of a language.
-
-**Human Readability**. Languages vary greatly in terms of human readability. Python, for example, is designed to be easily readable, using indentation to define blocks of code instead of curly braces or keywords:
-
-```python
-if age >= 18:
-print("Adult")
-```
-
-In the C language, for example, the braces would be required.
-
-Python's syntax emphasizes readability and simplicity, making it an excellent choice for beginners and rapid development. Other languages, such as Perl, may prioritize expressiveness and flexibility over readability:
-
-```perl
-print "Adult\n" if $age >= 18;
-```
-
-**Grammar Formalism**. The formal rules that define the structure of a language are defined by its grammar. Grammars are often based on Backus-Naur Form (BNF) or other formal grammar notations. While these are more relevant for compiler developers and language designers, they influence how expressive and flexible a language is.
-
-**Semantics**. While syntax governs how programs are written, semantics deal with what those programs do. Consider the following two examples of assignment:
-
-In Python:
-
-```python
-x = 5 # Assigns the value 5 to the variable x
-```
-
-In Haskell (a functional language):
-
-```haskell
-x = 5 -- Declares that x is always equal to 5 (an equation)
-```
-
-While the syntax looks similar, the semantics are quite different. In Python, x = 5 is an instruction to assign a value to a variable, but in Haskell, x = 5 is a declaration that defines a constant relationship.
-
-Some languages have strict rules for code structure and semantics (like Java), while others are more permissive (like JavaScript). Understanding the semantics of a language is crucial for writing correct programs, as it dictates the behavior of operations, function calls, and program flow.
-
-##### 2.1.2.4. Memory management
-
-Memory management refers to how a programming language handles the allocation, use, and release of memory during the execution of a program. Efficient memory management is crucial for both performance and reliability, as poor management can lead to issues such as memory leaks, excessive resource consumption, and program crashes.
-
-**Manual Memory Management**. In languages with manual memory management, developers are responsible for explicitly allocating and deallocating memory. C and C++ are common examples where the programmer uses functions like malloc() and free() in C or the new and delete operators in C++:
-
-```c
-int* ptr = (int*) malloc(sizeof(int));  // Allocating memory manually
-*ptr = 10;
-free(ptr); // Freeing memory manually
-```
-
-If a developer forgets to release the allocated memory, it can cause a memory leak, where the memory remains occupied without being used.
-
-**Automatic Memory Management (Garbage Collection)**. Many modern languages handle memory automatically through garbage collection. The system periodically checks for memory that is no longer in use and reclaims it without developer intervention. Java and Python both use garbage collection:
-
-```java
-String name = new String("John");
-// No need to manually free memory; the garbage collector will reclaim it when no longer needed
-```
-
-In Python, for instance, garbage collection is automatic, and developers rarely need to worry about memory leaks. However, this abstraction can sometimes lead to performance overhead, particularly if the garbage collector runs frequently.
-
-**Reference Counting**. Some languages, like Objective-C and Swift, use reference counting, a form of automatic memory management. Every object keeps track of how many references point to it, and when the reference count reaches zero, the object is deallocated:
-
-```swift
-var person: Person? = Person(name: "John")
-person = nil  // Reference count drops to zero, so memory is freed
-```
-
-This method is simple but can introduce problems with circular references, where two or more objects reference each other, preventing their memory from being freed.
-
-**Memory Pools**. Some languages allow developers to create memory pools or use arenas, where large blocks of memory are preallocated, and allocations come from this pool. Rust uses a system where ownership and borrowing rules manage memory, and explicit allocation and deallocation are not always necessary.
-
-```rust
-let x = Box::new(5);  // Memory is allocated automatically in Rust
-```
-
-##### 2.1.2.5. Compilation model
-
-Programming languages can differ significantly in how they are transformed into executable code, which directly affects their performance, flexibility, and usage scenarios. The compilation model refers to the process a language follows to transform source code into an executable form.
-
-**Compiled Languages**. In compiled languages, the source code is translated into machine code, which the computer can directly execute. This process happens once, typically before the program is run. Compiled languages, such as C, C++, and Rust, generally offer high performance because the code is optimized for the specific machine it will run on. Here's a basic compilation flow:
-
-```c
-gcc program.c -o program  // Compiles C source code into machine code
-```
-
-Once compiled, the program runs natively on the hardware without needing an interpreter or runtime.
-
-**Interpreted Languages**. In interpreted languages, the source code is executed line-by-line by an interpreter at runtime, rather than being compiled beforehand. Python, Ruby, and JavaScript are common examples of interpreted languages. Interpreted languages tend to be slower than compiled ones due to the overhead of interpretation, but they offer advantages like ease of debugging and platform independence:
-
-```python
-python script.py  # Runs the Python script through the interpreter
-```
-
-No machine code is generated, and the interpreter executes the instructions directly.
-
-**Just-in-Time (JIT) Compilation**. JIT compilation is a hybrid approach used by languages like Java and JavaScript (in modern engines). The source code is initially interpreted, but during execution, parts of the code that are frequently run are compiled into machine code on the fly. This provides a balance between performance and flexibility. In Java, the source code is compiled into bytecode, which the Java Virtual Machine (JVM) interprets and JIT compiles as needed:
-
-```java
-javac Program.java  // Compiles into bytecode
-java Program // JVM interprets and JIT compiles the bytecode
-```
-
-**Ahead-of-Time (AOT) Compilation**. Some languages, such as Swift, use AOT compilation, which compiles code directly into machine code, similar to traditional compilation models but with greater flexibility for optimizing specific platforms.
-
-##### 2.1.2.6. Concurrent Support
-
-Concurrency enables a program to perform multiple tasks simultaneously, which is important for improving performance in multi-core or distributed systems. Different languages implement concurrency in various ways:
-
-**Multithreading**. Languages like Java support multithreading, where separate threads are created to run tasks in parallel. Threads can improve performance for CPU-bound tasks, but managing synchronization between them can be complex, leading to race conditions or deadlocks.
-
-```java
-Thread t = new Thread(() -> {
-// Code runs in a separate thread
-});
-t.start();
-```
-
-**Asynchronous Programming**. Asynchronous programming is common in languages like JavaScript and Python. It allows tasks like I/O operations to run concurrently without creating new threads. This approach is efficient for handling tasks that involve waiting, such as network requests.
-
-```javascript
-async function fetchData() {
-  const data = await fetch("https://api.example.com");
-  console.log(data);
-}
-```
-
-**Coroutines**. Used in Python and Kotlin, coroutines are a lightweight alternative to threads. They allow for cooperative multitasking, yielding control when waiting on other tasks to complete.
-
-```python
-async def task():
-await another_task()
-```
-
-Concurrency models vary, and the choice depends on the nature of the task. CPU-intensive tasks may benefit from multithreading, while I/O-bound operations are more efficiently handled through asynchronous programming or coroutines.
-
-##### 2.1.2.7. Level of abstraction
-
-The level of abstraction refers to how close a programming language is to machine code versus human thinking. High-level languages abstract away most hardware details, while low-level languages offer fine control over system resources.
-
-**High-Level Languages**. Languages like Python and Java prioritize ease of use by abstracting memory management, file handling, and system calls. This makes development faster and easier but at the cost of performance. For example, Python's file handling:
-
-```python
-with open('file.txt', 'r') as file:
-    data = file.read()
-```
-
-**Low-Level Languages**. C and Assembly are low-level languages that provide direct control over memory and hardware. This allows developers to write highly optimized code but requires more effort:
-
-```c
-int* ptr = malloc(sizeof(int));
-*ptr = 10;
-```
-
-**Mid-Level Languages**. C++ offers a mix of both high- and low-level features, providing object-oriented programming while allowing manual memory management with pointers.
-
-##### 2.1.2.8. Error handling
-
-Error handling ensures that programs can respond to unexpected situations without crashing. Different languages approach error handling in various ways:
-
-**Exceptions**. Many languages, such as Python and Java, use exceptions to handle errors. When an error occurs, an exception is "thrown" and can be "caught" by the program to manage the issue without crashing.
-
-```python
-try:
-result = 10 / 0
-except ZeroDivisionError:
-print("Cannot divide by zero")
-```
-
-**Error Codes**. In languages like C, errors are handled by returning special values or codes from functions, and the developer must check for errors manually:
-
-```c
-FILE \*file = fopen("file.txt", "r");
-if (file == NULL) {
-printf("Error: Could not open file\n");
-}
-```
-
-**Assertions**. Assertions are used to check conditions during execution. If the condition fails, the program raises an error. This is often used for debugging:
-
-```python
-assert x > 0, "x must be positive"
-```
-
-Effective error handling is crucial for building reliable software. Exceptions offer structured error management, while error codes give more manual control but require careful checking.
+Error Handling: Robust error handling ensures reliability. Exceptions (e.g., Python) allow structured responses to runtime issues, while error codes (e.g., C) require manual checks. Assertions are commonly used for debugging. Each approach has strengths depending on the application context.
 
 ### 2.2. Compilation process
 
@@ -894,7 +538,7 @@ The analysis part is often called the front end, and the synthesis part is calle
 
 ![Compilation process phases](../images/2-1-compilation-process-phases.png)
 
-Figure 2.1. Compilation process phases
+Figure 1 - Compilation process phases
 
 ##### 2.2.2.1. Symbol table
 
@@ -960,36 +604,6 @@ The extent of code optimization varies significantly among different compilers. 
 The code generator receives an intermediate representation of the source program and translates it into the target language. If the target language is machine code, it involves selecting registers or memory locations for each variable used by the program.
 The intermediate instructions are then converted into sequences of machine instructions that accomplish the same tasks. An essential part of code generation is the careful assignment of registers to store variables.
 
----
-
-NOTES:
-
-EVM is alike Java VM, and their compilation processes are similar too. [2.1, p.2-3, Example 1.1].
-
-Chapter 6 describes principal intermediate representations used in compilers.
-
-There is a great variation in the amount of code optimization different compilers perform. In those that do the most, the so-called optimizing compilers, "a significant amount of time is spent on this phase. There are simple optimizations that signifficantly improve the running time of the target programwithout slowing down compilation too much. The chapters from 8 on discuss
-machine-independent and machine-dependent optimizations in detail. [2.1, p.10]
-
-Data-flow analysis engines that facilitate the gathering of information about how values are transmitted from one part of a program to eachother part.
-Data-flow analysis is a key part of code optimization. [2.1, p.12]
-
-The science of code optimization [2.1, p.15, 1.4.2]
-
-A high-level programming language defines a programming abstraction: the
-programmer expresses an algorithm using the language, and the compiler must
-translate that program to the target language. Generally, higher-level programming languages are easier to program in, but are less efficient, that is, the target
-programs run more slowly. Programmers using a low-level language have more
-control over a computation and can, in principle, produce more efficient code. [2.1, p.17]
-
-A body of compiler optimizations, known as data-ow optimizations, has been developed to analyze
-the ow of data through the program and removes redundancies across these
-constructs. They are effective in generating code that resembles code written by a skilled programmer at a lower level. [2.1, p.18]
-Read about data flow optimization?
-
-TODO:
-Should we describe the connection with the EVM here or move the entire "EVM" section to the "Compilation and bytecode" chapter?
-
 ## Chapter 3. Blockchain programming languages comparison
 
 Blockchain development involves selecting the right programming language to build efficient, secure, and scalable decentralized applications (DApps) and smart contracts. Given the unique demands of blockchain environments, different languages offer varying levels of performance, security, and resource efficiency, especially regarding gas consumption. This chapter will compare the most widely used programming languages in blockchain development, focusing on their features and gas efficacy.
@@ -1006,422 +620,92 @@ The following analysis will focus on the technical features that differentiate t
 
 #### 3.1.1. Solidity
 
-Solidity is a statically typed, contract-oriented programming language specifically designed for developing smart contracts on the Ethereum platform. Introduced in 2014 by Gavin Wood, one of the co-founders of Ethereum, Solidity has become the most popular language for writing decentralized applications (DApps) and executing smart contracts on Ethereum and other EVM-compatible blockchains. Its syntax is similar to JavaScript and C++, making it accessible for developers familiar with these languages. Solidity was developed to handle the creation, execution, and management of self-enforcing contracts, and it plays a central role in enabling decentralized finance (DeFi), non-fungible tokens (NFTs), and various blockchain applications.
-
-Solidity Features include:
-
-**Paradigm**
-Solidity is primarily an object-oriented and contract-oriented language. Each smart contract is akin to a class in object-oriented programming, with state variables, functions, and modifiers that dictate behavior. The contract paradigm enforces encapsulation, where contracts hold their own data and logic, making Solidity well-suited for developing decentralized applications with isolated functionalities.
-
-Example of a contract in Solidity:
+Paradigm. Solidity is a statically typed, contract-oriented language for writing smart contracts on Ethereum. It follows object-oriented and contract-oriented paradigms, where contracts resemble classes, encapsulating state and behavior [Code Sn. 1].
 
 ```solidity
-pragma solidity ^0.8.0;
-
 contract SimpleStorage {
-    uint storedData;
-
-    function set(uint x) public {
-        storedData = x;
-    }
-
-    function get() public view returns (uint) {
-        return storedData;
-    }
+        uint256 storedData;
+        function set(uint256 x) public { storedData = x; }
+        function get() public view returns (uint256) {
+    return storedData;
+}
 }
 ```
 
-**Typing Discipline**
-Solidity is statically typed and strongly typed. Variables and data types must be declared explicitly, and the language enforces strict type rules, reducing the likelihood of type-related errors. For example, variables must be explicitly declared as uint, int, address, bytes, or bool types, among others. The strong typing ensures that operations on incompatible types are flagged at compile time.
+Code Snippet 1 – Solidity overview
 
-```solidity
-uint age = 25;
-address walletAddress = 0xAb8483F64d9C6d1EcF9b849Ae677dD3315835Cb2;
-```
+Typing Discipline. Statically and strongly typed, Solidity requires explicit type declarations (e.g., uint, address). Type mismatches are flagged at compile time, enhancing reliability.
+Memory Management. Solidity uses the EVM's automatic memory management. Developers specify storage (persistent) or memory (temporary) for variables, optimizing gas usage.
+Syntax and Semantics. Inspired by JavaScript and C++, Solidity supports common control structures (if, for) and custom modifiers to enhance function behavior. Contracts operate autonomously in response to inputs.
+Error Handling. Errors revert the state to avoid side effects. Tools like require(), assert(), and revert() handle input validation and invariant enforcement:
 
-**Memory Management**
-Solidity relies on automatic memory management, where the Ethereum Virtual Machine (EVM) handles memory allocation and deallocation during contract execution. However, developers are required to specify whether variables are stored in storage (persistent data) or memory (temporary data). Incorrect handling of these storage types can lead to inefficient gas usage.
+require(b > 0, "Cannot divide by zero");
 
-```solidity
-function setMemoryVariable(uint data) public pure returns(uint) {
-    uint memoryVariable = data;  // Stored in memory
-    return memoryVariable;
-}
-```
-
-**Syntax and Semantics**
-Solidity’s syntax is heavily influenced by JavaScript and C++, making it familiar to developers from web and system programming backgrounds. It includes control structures such as if, else, for, and while. Contracts in Solidity define functions, events, and state variables, and the language supports modifiers that can change the behavior of functions. Semantically, contracts operate as autonomous agents that execute their logic in response to external inputs.
-
-```solidity
-function increment(uint x) public pure returns (uint) {
-    return x + 1;
-}
-```
-
-**Error Handling**
-Solidity uses an exception-based error handling system. When a contract encounters an error, it can revert the state to prevent unintended side effects. Errors can be handled using require(), assert(), and revert(). The require statement is often used for input validation, assert is used to enforce invariants, and revert allows for more explicit error messaging.
-
-```solidity
-function divide(uint a, uint b) public pure returns (uint) {
-    require(b > 0, "Cannot divide by zero");
-    return a / b;
-}
-```
-
-The try/catch mechanism, introduced in later versions of Solidity, allows contracts to handle errors from external function calls, making it easier to recover from execution failures.
-
-```solidity
-try externalContract.someFunction() {
-    // Success case
-} catch {
-    // Error case
-}
-```
-
-**Level of Abstraction**
-Solidity is a high-level language designed to abstract much of the low-level EVM details from the developer. However, developers must still manage gas usage and optimize their code to prevent excessive costs. Its high-level constructs allow developers to write complex logic without worrying about direct machine code, but it also gives access to lower-level details when needed, such as inline assembly.
-
-```solidity
-assembly {
-    let result := add(1, 2)
-}
-```
+Level of Abstraction. A high-level language abstracting EVM details while enabling inline assembly for low-level control. Developers optimize gas usage through careful coding.
 
 #### 3.1.2. Vyper
 
-**Short Description and History**
-Vyper is a statically typed, contract-oriented programming language designed to improve the security and simplicity of smart contract development on the Ethereum platform. It was introduced as an alternative to Solidity, with a focus on providing a more readable and secure syntax, inspired by Python. The language aims to minimize complexity, limit features that could introduce vulnerabilities, and prioritize human readability and auditability of smart contracts. Vyper was developed to enforce stricter rules, reduce the likelihood of developer errors, and make smart contracts easier to verify and analyze, thus promoting safe blockchain development.
+Paradigm. Vyper, inspired by Python, emphasizes simplicity and security. It avoids features like function overloading and inheritance, focusing on readable, secure contracts [Code Sn. 2].
 
-**Vyper Features** include:
-
-**Paradigm**
-Vyper is contract-oriented and focuses on security and simplicity. Like Solidity, Vyper organizes code into smart contracts that hold data and define behavior. However, Vyper’s design philosophy is to keep the language simple and minimalistic, removing features that are seen as potentially unsafe, such as function overloading and class inheritance.
-
-Example of a simple Vyper contract:
-
-```python
+```solidity
 stored_data: public(uint256)
 
 @external
-def set_data(x: uint256):
-self.stored_data = x
-
+def set_data(x: uint256): self.stored_data = x
 @view
 @external
-def get_data() -> uint256:
-return self.stored_data
+def get_data() -> uint256: return self.stored_data
 ```
 
-**Typing Discipline**
-Vyper is statically typed and strongly typed, requiring developers to declare types explicitly. It enforces strict type safety to prevent type-related errors. Every variable and function argument in Vyper must have a declared type, such as uint256 or address. Vyper does not allow implicit type conversions, adding an extra layer of security by ensuring that type mismatches are caught during compilation.
+Code Snippet 2 – Vyper overview
 
-```python
-balance: uint256
-owner: address
-```
-
-**Memory Management**
-Vyper also relies on automatic memory management by the Ethereum Virtual Machine (EVM), similar to Solidity. However, it restricts complex memory operations to ensure that contracts are more secure and easier to audit. Vyper requires developers to declare whether data is stored in storage or memory, ensuring that resources are managed effectively.
-
-```python
-@external
-def add_data(value: uint256):
-temp: uint256 = value # Stored in memory
-```
-
-**Syntax and Semantics**
-Vyper’s syntax is deliberately simple and closely follows Python’s syntax, with an emphasis on readability and security. It removes features that could introduce security risks, such as infinite loops and dynamic code generation. Vyper supports if, else, and for control structures, but with constraints to ensure safe execution. This simplicity makes it easier for developers and auditors to reason about the code.
-
-```python
-if self.stored_data > 100:
-return True
-else:
-return False
-```
-
-Unlike Solidity, Vyper does not allow complex control structures like while loops, which could lead to gas exhaustion.
-
-**Error Handling**
-Vyper employs a strict error handling model using assertions and condition checks. It uses the assert statement to enforce conditions that must hold true for the contract to proceed. If an assertion fails, the transaction is reverted, preventing unintended changes to the blockchain state. Vyper does not have exception handling, focusing instead on avoiding errors through simplicity and stricter checks at compile time.
-
-```python
-@external
-def divide(a: uint256, b: uint256) -> uint256:
-assert b > 0, "Cannot divide by zero"
-return a / b
-```
-
-**Level of Abstraction**
-Vyper is considered a high-level language with a higher degree of abstraction than Solidity, but its minimalistic nature reduces its overall complexity. It abstracts away many low-level EVM operations while retaining enough control for developers to optimize gas usage. Its strict design prevents the use of lower-level constructs like inline assembly, as they are seen as potential security risks. The language prioritizes simplicity and auditability, making it ideal for writing secure contracts, but limiting some of the flexibility offered by Solidity.
+Typing Discipline. Statically and strongly typed, Vyper enforces explicit type declarations (e.g., uint256, address) and disallows implicit conversions, ensuring security.
+Memory Management. Like Solidity, Vyper relies on the EVM’s automatic memory management, requiring explicit declarations of storage and memory.
+Syntax and Semantics. Vyper adopts Python-like syntax with simplified control structures (if, for) and restricts complex operations like while loops to enhance security.
+Error Handling. Assertions (assert) are used for conditions that must hold true. Failed assertions revert transactions, preserving blockchain state.
+Level of Abstraction. A high-level language with strict rules, Vyper simplifies contract auditability but limits flexibility by excluding low-level constructs.
 
 #### 3.1.3. Yul
 
-**Short Description and History**
-Yul is an intermediate-level, assembly-like language designed as a common intermediary for multiple backends in the Ethereum ecosystem, including Ethereum 1.0, Ethereum 2.0, and Ethereum-flavored WebAssembly (eWASM). It is primarily used for optimizing smart contracts by providing a more direct and efficient way to interact with the Ethereum Virtual Machine (EVM) compared to high-level languages like Solidity. Yul is tightly integrated with Solidity but can also be used as a standalone language to write low-level code. It supports a simplified structure that is useful for developers seeking to fine-tune contract performance or reduce gas costs. Yul can be compiled directly to bytecode and offers more control over low-level operations, making it a powerful tool for Ethereum smart contract development.
-
-**Yul Features** include:
-**Paradigm**.
-Yul is a procedural and low-level language, focusing on direct interaction with the EVM. It is designed for use cases where performance optimization is crucial, offering fine-grained control over computational steps. In contrast to object-oriented paradigms like Solidity, Yul emphasizes simple, sequential execution and allows developers to write functions, loops, and basic control structures in a straightforward, assembly-like format.
-
-Example of a Yul function:
-
-```yul
-function add(x, y) -> sum {
-    sum := add(x, y)
-}
-```
-
-**Typing Discipline**.
-Yul is dynamically typed and weakly typed, meaning that variables can hold any type of value and type checking is minimal. Yul does not enforce strict type rules as higher-level languages do, allowing for greater flexibility in low-level programming. All values are treated as 256-bit words, which map directly to the way the EVM operates.
-
-Example of simple variable declaration in Yul:
-
-```yul
-let x := 10
-let y := 0xFF  // Hexadecimal representation
-```
-
-**Memory Management**.
-In Yul, developers must manually manage memory and storage, providing more control over how data is handled during execution. Memory in Yul is linear and unstructured, which gives the developer direct control over allocating and accessing memory locations. The mstore and mload opcodes are used to store and retrieve data from memory, while sstore and sload are used for interacting with storage (persistent data).
-
-Example of memory manipulation in Yul:
-
-```yul
-let ptr := mload(0x40)  // Load free memory pointer
-mstore(ptr, 42)  // Store value 42 at the free memory location
-```
-
-Storage is managed similarly:
-
-```yul
-sstore(0x0, 1)  // Store value 1 in storage slot 0
-```
-
-**Syntax and Semantics**.
-Yul has a minimalistic and assembly-like syntax, designed to be readable yet close to the underlying machine code. It includes basic control structures like if statements and loops (for and while), allowing developers to build logical flow control for complex operations while keeping the syntax straightforward. The simplicity of Yul’s syntax makes it well-suited for optimizing smart contracts where the focus is on performance rather than readability or expressiveness.
-
-Example of an if statement in Yul:
-
-```yul
-if eq(x, y) {
-    return(0, 0)
-}
-```
-
-Yul also allows for loops:
-
-```yul
-for { let i := 0 } lt(i, 10) { i := add(i, 1) } {
-    // Loop body
-}
-```
-
-**Error Handling**.
-Yul provides minimal error handling. It does not have high-level constructs for handling errors such as exceptions or require statements like Solidity. Instead, error handling is typically done by reverting transactions using the revert opcode, which halts execution and returns the unused gas to the sender. This low-level approach places the burden on the developer to manage errors manually.
-
-Example of reverting a transaction in Yul:
-
-```yul
-if iszero(success) {
-    revert(0, 0)
-}
-```
-
-Errors must be handled explicitly by checking conditions and reverting if necessary, leaving little room for complex error-handling logic.
-
-Since Yul is designed for low-level programming, it lacks built-in error-handling structures beyond transaction reversion. Developers must explicitly check for errors in contract logic and handle them manually using the EVM’s native error mechanisms. This approach reduces the overhead associated with high-level error handling but requires careful attention to avoid unintended behavior.
-
-```yul
-let success := call(gas(), toAddress, value, inputData, inputSize, outputData, outputSize)
-if iszero(success) {
-revert(0, 0) // Explicit error handling
-}
-```
-
-**Level of Abstraction**.
-Yul is a low-level language, offering minimal abstraction over the Ethereum Virtual Machine (EVM). It is designed to be closer to assembly language, giving developers precise control over gas usage and performance optimization. Unlike higher-level languages like Solidity or Vyper, Yul exposes low-level EVM details, enabling developers to write highly efficient code. The language's low abstraction makes it suitable for writing optimized and gas-efficient contracts, but it comes at the cost of increased complexity and manual management of resources like memory and gas.
-
-Example of low-level manipulation using assembly in Yul:
-
-```yul
-let result := add(2, 3) // Low-level arithmetic operation
-```
+Paradigm. Yul is a low-level, procedural language for direct EVM interaction. It focuses on performance optimization and fine-grained control:
+function add(x, y) -> sum { sum := add(x, y) }
+Typing Discipline. Dynamically and weakly typed, all variables are treated as 256-bit words. Yul avoids type enforcement for maximum flexibility.
+Memory Management. Manual memory and storage management using opcodes like mstore, mload, and sstore:
+let ptr := mload(0x40)
+mstore(ptr, 42)
+Syntax and Semantics. Assembly-like with basic structures (if, for). Yul enables low-level optimizations while maintaining readable syntax.
+Error Handling. Minimal; transactions are reverted using the revert opcode. Developers handle errors explicitly.
+Level of Abstraction. Minimal abstraction, providing direct EVM control for gas-efficient and optimized contracts.
 
 #### 3.1.4. Yul+
 
-**Short Description and History**
-Yul+ is an extension of the Yul intermediate language designed to improve the expressiveness and security of low-level contract development on Ethereum. Developed by the Solidity team, Yul+ builds on Yul’s minimalistic syntax while adding features that provide developers with more control and flexibility when interacting with the Ethereum Virtual Machine (EVM). Yul+ is often used in the context of advanced optimization for smart contracts or during the compilation of high-level Solidity code down to more efficient bytecode. It allows developers to implement gas-efficient logic and achieve greater control over memory, storage, and low-level execution, while still offering more functionality compared to plain Yul.
-
-Yul+ adds features such as user-defined functions with parameter validation and return types, error handling improvements, and more structured control flows, making it more versatile for writing low-level code.
-
-**Yul+ Features** include:
-**Paradigm**
-Like Yul, Yul+ is primarily a procedural and low-level language, but it introduces more high-level constructs for function definitions, making it more flexible for certain programming patterns. It supports simple procedures and state transitions, with an emphasis on gas optimization and control over execution.
-
-Example of a Yul+ function with input and output validation:
-
-```yul
-function multiply(a: uint256, b: uint256) -> result {
-    result := mul(a, b)
-}
-```
-
-**Typing Discipline**
-Yul+ retains dynamic typing but introduces more explicit handling of input and output types in functions, unlike Yul’s entirely weak typing. Variables in Yul+ can still hold any type of value as 256-bit words, but function parameters can be constrained by types for better validation. This provides a slightly stricter development model compared to Yul while retaining the flexibility of low-level memory manipulation.
-
-Example with parameter typing:
-
-```yul
-function add(a: uint256, b: uint256) -> sum {
-    sum := add(a, b)
-}
-```
-
-**Memory Management**
-Like Yul, Yul+ requires manual memory management, allowing developers to control the allocation and retrieval of data from memory and storage directly. It provides functions like mstore and mload for manipulating memory and sstore and sload for storage. Yul+ also offers the ability to define memory layouts more explicitly, making it easier to work with complex data structures while minimizing gas usage.
-
-Example of memory manipulation in Yul+:
-
-```yul
-let ptr := mload(0x40)  // Load the free memory pointer
-mstore(ptr, 100)  // Store 100 at the pointer address
-```
-
-Storage access
-
-```yul
-sstore(0x1, 500)  // Store 500 in storage slot 1
-```
-
-**Syntax and Semantics**
-Yul+ extends Yul’s minimalistic and assembly-like syntax by adding more structured constructs. It includes if, for, and while loops, similar to Yul, but offers improved function definitions and better handling of control flows. Yul+ also introduces more readable and secure code structures, which makes it easier for developers to write optimized yet maintainable smart contracts.
-
-Example of an if statement and a loop in Yul+:
-
-```yul
-if eq(a, 1) {
-    revert(0, 0)
-}
-
-for { let i := 0 } lt(i, 10) { i := add(i, 1) } {
-    // Loop body
-}
-```
-
-The addition of structured functions with return types and parameter validation is a key improvement in Yul+ over Yul.
-
-**Error Handling**
-Yul+ enhances error handling by improving support for reverts and adding better handling of function failures. Like Yul, Yul+ allows for explicit error checking and reverts using the revert opcode. However, Yul+ provides a clearer way to define custom revert conditions, making error handling more structured. This allows developers to write contracts that can fail gracefully with more explicit error handling logic.
-
-Example of error handling in Yul+:
-
-```yul
-let success := call(gas(), to, value, inputData, inputSize, outputData, outputSize)
-if iszero(success) {
-    revert(0, 0)
-}
-```
-
-Yul+ adds support for user-defined function error handling, giving developers more control over error management.
-
-**Level of Abstraction**
-Yul+ is a low-level language, similar to Yul, offering minimal abstraction over the Ethereum Virtual Machine (EVM). However, it introduces some higher-level features like typed function signatures and better control over memory layout. These additions provide developers with more flexibility in writing optimized code, while still maintaining the low-level access necessary for performance and gas optimization.
-
-The low-level control allows developers to optimize gas costs and performance in Ethereum contracts, but Yul+ also makes it easier to write more structured, maintainable code without sacrificing too much control.
-
-Example of low-level manipulation in Yul+:
-
-```yul
-function square(x: uint256) -> result {
-    result := mul(x, x)
-}
-```
-
-Yul+ enhances error handling by allowing for custom conditions and structured function failure, making it more robust for developers who need fine control over contract behavior.
+Paradigm. An extension of Yul, Yulp introduces typed functions, improved error handling, and structured control flows for greater flexibility:
+function multiply(a: uint256, b: uint256) -> result { result := mul(a, b) }
+Typing Discipline. Retains dynamic typing but introduces parameter and return type definitions for functions, enhancing safety.
+Memory Management. Manual, with more structured memory layouts for handling complex data while reducing gas costs.
+Syntax and Semantics. Similar to Yul, with enhancements like structured functions and improved readability.
+Error Handling. Supports explicit checks and reverts for robust error management, making contracts more maintainable.
+Level of Abstraction. Low-level, balancing flexibility and readability with better developer control over gas optimization.
 
 #### 3.1.5. Fe
 
-**Short Description and History**
-Fe is a statically typed, contract-oriented programming language designed for developing smart contracts on the Ethereum platform. Inspired by Python, Fe aims to offer a simpler, more user-friendly syntax compared to Solidity while focusing on performance and security. Fe was created as part of Ethereum's ecosystem to provide developers with an alternative to Solidity that embraces Python-like readability and usability. The language is still under development and aims to become a mature option for writing Ethereum smart contracts. It is designed to work with Ethereum's Ethereum Virtual Machine (EVM), providing access to the same execution environment as Solidity and Vyper.
-
-**Fe Features** include:
-**Paradigm**
-Fe is a contract-oriented language like Solidity and Vyper, focusing on building smart contracts that hold state and define business logic. Each contract contains data (state variables) and methods (functions) that operate on that data. Fe’s contract-oriented nature makes it suitable for developing decentralized applications (DApps) and executing smart contracts in an efficient, Python-like syntax.
-
-Example of a simple contract in Fe:
+Paradigm. Fe is a statically typed, contract-oriented language inspired by Python. It emphasizes simplicity, readability, and security [Code Sn. 3].
 
 ```fe
 contract SimpleStorage:
-pub stored_data: u256
+    pub stored_data: u256
 
-    pub def set_data(value: u256):
-        self.stored_data = value
-
-    pub def get_data() -> u256:
-        return self.stored_data
+    pub def set_data(value: u256): self.stored_data = value
+    pub def get_data() -> u256: return self.stored_data
 ```
 
-**Typing Discipline**
-Fe is statically typed and strongly typed, meaning that variable types must be declared explicitly and type checking occurs at compile time. Fe enforces strict type safety to prevent type-related bugs, providing developers with confidence in the correctness of their code. Common data types include u256 for unsigned integers and bool for boolean values. This strong typing reduces runtime errors caused by type mismatches.
+Code Snippet 3 – Fe overview
 
-Example of variable declaration in Fe:
-
-```fe
-pub stored_data: u256
-```
-
-**Memory Management**
-Fe follows the EVM’s model of automatic memory management, but it allows developers to control whether variables are stored in storage (persistent data) or memory (temporary data). This distinction is important for managing gas consumption efficiently, as interacting with storage is more expensive. Like Solidity and Vyper, Fe’s memory management is handled through explicit declarations, but the EVM ensures proper allocation and deallocation of resources.
-
-Example of memory and storage usage in Fe:
-
-```fe
-pub def store_in_memory(value: u256) -> u256:
-let temp_value: u256 = value // Stored in memory
-return temp_value
-```
-
-**Syntax and Semantics**
-Fe’s syntax is inspired by Python, aiming to offer simplicity and readability. It supports control structures such as if, else, and for loops, similar to Python, but with a focus on contract-oriented logic. The syntax makes Fe accessible for developers who are familiar with Python, while still providing the necessary constructs for smart contract development. Semantically, Fe enforces stricter rules than Python to ensure security and performance in smart contract execution.
-
-Example of control flow in Fe:
-
-```fe
-pub def check_value(value: u256) -> bool:
-if value > 100:
-return True
-else:
-return False
-```
-
-**Error Handling**
-Fe provides exception-based error handling similar to Solidity, allowing developers to use assertions to enforce conditions that must be true during execution. If a condition fails, Fe’s contracts revert the transaction to prevent unintended state changes. Error handling in Fe is designed to be simple yet effective, ensuring that smart contracts behave predictably even when unexpected conditions arise. Fe primarily uses assert to check conditions, and failed assertions cause the contract to revert, maintaining the integrity of the blockchain.
-
-Example of error handling in Fe:
-
-```fe
-pub def divide(a: u256, b: u256) -> u256:
-assert b > 0, "Cannot divide by zero"
-return a / b
-```
-
-Example of a safe subtraction in Fe:
-
-```fe
-pub def safe_subtract(a: u256, b: u256) -> u256:
-assert a >= b, "Subtraction underflow"
-return a - b
-```
-
-**Level of Abstraction**
-Fe is considered a high-level language, offering more abstraction than lower-level languages like Yul or Yul+. It simplifies interaction with the EVM while maintaining enough control for developers to write efficient smart contracts. Fe’s abstraction focuses on ease of use, readability, and security, making it a good choice for developers who prioritize simplicity without needing to handle the fine details of EVM internals.
-
-Example of high-level function definition in Fe:
-
-```fe
-pub def increment(value: u256) -> u256:
-return value + 1
-```
+Typing Discipline. Statically and strongly typed, requiring explicit type declarations. Fe prevents implicit conversions, reducing runtime errors.
+Memory Management. EVM-managed with developer-specified storage or memory for efficiency.
+Syntax and Semantics. Python-like syntax for control structures (if, for). Stricter than Python, ensuring secure contract logic.
+Error Handling. Uses assertions to enforce conditions, reverting transactions on failure to maintain blockchain integrity.
+Level of Abstraction. A high-level language with focus on usability and security, abstracting low-level EVM details for simplicity.
 
 ### 3.2. Criterias for comparison
 
@@ -1573,47 +857,12 @@ Finalizing, the benchmark contract implements ERC20 standard with the following 
 
 #### 3.3.2. Gas comparison criteria
 
-In order to effectively compare the gas efficiency of programming languages, several key criteria must be added. These criteria focus on both the gas costs associated with core operations in the ERC20 token contract and the overall efficiency of the bytecode generated by each language. The selected criteria are designed to evaluate how each language optimizes for typical contract interactions and affects gas consumption.
-
-##### 3.3.2.1. Bytecode Size
-
-Bytecode size refers to the size of the compiled contract code that is deployed to the Ethereum blockchain. The size of the bytecode impacts deployment costs, as larger contracts require more gas to be deployed. Efficient compilation leads to smaller bytecode, which can significantly reduce deployment gas fees. Each language will be assessed based on how compact and optimized its bytecode is after compilation.
-
-#### 3.3.2.2. Deployment gas cost of the contract
-
-The deployment gas cost of the contract reflects the efficiency of the language in generating bytecode and initializing contract state. Lower deployment costs indicate that the language optimizes for gas efficiency during contract creation, reducing the overhead associated with deploying new contracts. Measuring the gas cost of deploying the ERC20 token contract provides insight into how well each language manages contract initialization and bytecode generation.
-
-##### 3.3.2.3. Gas Used for mutative functions
-
-Mutative functions are functions that modify the state of the contract, such as minting new tokens, transferring tokens between addresses, or burning tokens. The gas used for these functions reflects how efficiently the language handles state changes and updates to the contract’s storage. Measuring gas consumption for mutative functions helps to evaluate how well each language optimizes for state modifications and storage updates, which are critical for contract execution.
-
-The approve() function allows a token holder to authorize a third party (typically another contract) to spend tokens on their behalf. This is crucial for enabling decentralized finance (DeFi) operations, where contracts need to interact with tokens on behalf of users. The gas used for approve() reflects the efficiency of managing allowances and permissions within the contract. Measuring this operation helps to assess how well the language manages gas consumption for security-sensitive operations like permission delegation.
-
-The transfer() function is one of the core operations of the ERC20 token contract, allowing token holders to send tokens to another address. Gas consumption for this function reflects how efficiently the language handles standard token transfers, which are one of the most common operations in tokenized applications. Comparing the gas used for transfer() in different languages provides insight into how well each language optimizes for simple state changes in a contract.
-
-The transferFrom() function allows a third party, once approved, to transfer tokens on behalf of the token holder. This is a more complex operation than transfer(), as it involves both authorization checks and token transfers. Measuring gas consumption for this function reveals how efficiently each language handles multi-step operations and contract logic that involves checks, updates, and state modifications. It also provides a clearer understanding of how the language optimizes more intricate contract interactions.
-
-The burn() function allows token holders to destroy tokens, removing them from circulation. This operation is essential for managing token supply and ensuring that tokens can be removed when needed. The gas used for burn() reflects how efficiently the language handles token destruction and state updates.
-
-By evaluating these criteria, a comprehensive comparison of the gas efficiency of each language can be established, providing insight into the strengths and weaknesses of each language in terms of execution cost and bytecode optimization.
-
-#### 3.3.2.4. Gas Used for view functions
-
-View functions are functions that read data from the contract without modifying the state. These functions are essential for querying contract state, checking balances, and retrieving information without incurring gas costs.
-When called from outside of the blockchain, view functions are free to execute, as they do not alter the contract state. However, when called from within the blockchain, view functions consume gas to prevent abuse and ensure that contract interactions are appropriately priced.
-The gas used for view functions reflects how efficiently the language handles read-only operations and minimizes gas consumption for non-mutative operations.
-
-The name() function retrieves the name of the token, providing a human-readable identifier for the token contract. This operation is essential for identifying tokens and distinguishing between different assets in a decentralized application.
-
-The symbol() function retrieves the symbol of the token, which is a shorthand representation of the token’s name. This operation is commonly used to display token symbols in user interfaces and applications.
-
-The decimals() function retrieves the number of decimal places used by the token, indicating the divisibility of the token. This operation is crucial for handling token amounts accurately and ensuring that token transfers are precise.
-
-The totalSupply() function retrieves the total supply of tokens issued by the contract. This operation is essential for tracking the total number of tokens in circulation and managing the token economy.
-
-The balanceOf() function retrieves the token balance of a specific address. This operation is a common use case in decentralized applications, where users need to check their token holdings.
-
-The allowance() function retrieves the amount of tokens that a token holder has approved for a specific spender. This operation is crucial for managing token permissions and authorizations.
+To compare the gas efficiency of programming languages for blockchain, several criteria are evaluated, focusing on the gas costs of core ERC20 token operations and the efficiency of generated bytecode.
+Bytecode size influences deployment costs, as larger contracts require more gas to deploy. Languages that produce smaller, more optimized bytecode can significantly reduce deployment fees.
+Deployment gas cost reflects the efficiency of a language in generating and initializing contract bytecode. Measuring the gas used during the deployment of an ERC20 token contract highlights how well a language minimizes the overhead of contract creation.
+Gas usage for mutative functions—such as approve, transfer, transferFrom, and burn—indicates how efficiently a language handles state modifications and storage updates. For example, approve measures gas efficiency in managing permissions, while transfer reflects how well the language handles token transfers, a core operation in most applications. More complex functions like transferFrom, which involve authorization checks and token transfers, provide insights into handling multi-step operations. Similarly, burn assesses the language's efficiency in token destruction and state updates.
+View functions, which read data without altering the contract state, are another key metric. These functions are free to call externally but consume gas when invoked internally. Functions like name, symbol, and decimals provide token metadata, while totalSupply tracks circulating tokens. Operations such as balanceOf and allowance are critical for checking token balances and permissions, reflecting the efficiency of non-mutative operations.
+By assessing these criteria, a comprehensive understanding of the strengths and weaknesses of each programming language in terms of execution cost, bytecode optimization, and operational efficiency can be achieved. This evaluation helps identify which languages are better suited for gas-sensitive applications and highlights opportunities for optimization in smart contract development.
 
 #### 3.3.3. Developing the Smart Contract
 
@@ -1679,24 +928,6 @@ decimals: public(uint8)
 
 @external
 def transfer(_to : address, _value : uint256) -> bool:
-  ...
-```
-
-An acute reader also could notice that Vyper has function visibility types and nat spec documentation.
-
-```vyper
-@external
-def burnFrom(_to: address, _value: uint256):
-  """
-  @dev Burn an amount of the token from a given account.
-  @param _to The account whose tokens will be burned.
-  @param _value The amount that will be burned.
-  """
-  self.allowance[_to][msg.sender] -= _value
-  self._burn(_to, _value)
-
-@internal
-def _burn(_to: address, _value: uint256):
   ...
 ```
 
@@ -1772,7 +1003,7 @@ Additionally, Fe does not use inline assembly or low-level function dispatching 
 Unlike Yul and Yul+, Fe stands out with its clear separation of pub and internal functions, enhancing modularity while remaining more gas-efficient and optimized than Solidity's high-level structure, with lower cognitive overhead compared to Vyper’s more verbose approach.
 
 ```fe
- pub fn transferFrom(mut self, mut ctx: Context, sender: address, recipient: address, value: u256) -> bool {
+pub fn transferFrom(mut self, mut ctx: Context, sender: address, recipient: address, value: u256) -> bool {
     assert self._allowances[sender][ctx.msg_sender()] >= value
     self._transfer(ctx, sender, recipient, value)
     self._approve(ctx, owner: sender, spender: ctx.msg_sender(), value: self._allowances[sender][ctx.msg_sender()] - value)
@@ -1790,7 +1021,9 @@ Each bytecode is stored in a "bin" field of a json file with a name, correspondi
 
 To ease the compilation, a Makefile was created, that can compile all languages with a simple command.
 
-**Solidity**. The Solidity contract is compiled using solc, the Solidity compiler, several times to generate different outputs for comparison.
+##### 3.3.4.1 Compiling Solidity
+
+The Solidity contract is compiled using solc, the Solidity compiler, several times to generate different outputs for comparison.
 
 The compiler can be installed using several methods, including npm, Docker, apt-get, brew, or built from source. https://docs.soliditylang.org/en/v0.8.27/installing-solidity.html
 
@@ -1841,7 +1074,9 @@ To compile the contract with the optimizer enabled and set to 100000 runs, the f
 solc --optimize --optimize-runs 100000 --combined-json bin src/solidity/ERC20.sol | jq -r '.contracts["src/solidity/ERC20.sol:ERC20"]' > out/solidity/ERC20_opt.json
 ```
 
-**Vyper**. The Vyper contract is compiled using the vyper compiler and different optimization modes are used: "none", "codesize" and "gas". Each of them is used to evaluate the impact on gas efficiency.
+##### 3.3.4.2 Compiling Vyper
+
+The Vyper contract is compiled using the vyper compiler and different optimization modes are used: "none", "codesize" and "gas". Each of them is used to evaluate the impact on gas efficiency.
 
 The compiler can be installed using several methods, including pip, Docker or nix. https://docs.vyperlang.org/en/stable/installing-vyper.html
 
@@ -1877,7 +1112,9 @@ To compile the contract with codesize optimization enabled, the following comman
 vyper src/vyper/ERC20.vy --optimize codesize | cut -c 3- | jq -R --slurp '{bin: (.| sub("\n$"; ""))}' > out/vyper/ERC20_opt_codesize.json
 ```
 
-**Yul**. The Yul contract is compiled using the solc compiler as it has a built-in Yul compiler. There is no standalone Yul compiler as of time of writing.
+##### 3.3.4.3 Compiling Yul
+
+The Yul contract is compiled using the solc compiler as it has a built-in Yul compiler. There is no standalone Yul compiler as of time of writing.
 
 The contract is compiled with and without optimizations to evaluate the impact on gas efficiency.
 
@@ -1897,7 +1134,9 @@ solc --strict-assembly --optimize --bin src/yul/ERC20.yul | grep -A 1 "Binary re
 
 The default optimization runs is 200, however, it can be changed with the `--optimize-runs` flag. Nevertheless, compiling with higher number of runs produces the same bytecode in our case, therefore this compilation option is not compared.
 
-**Yulp**. The Yulp compiler can be installed as an npm package, and there is no CLI tool for it as of time of writing.
+##### 3.3.4.4 Compiling Yulp
+
+The Yulp compiler can be installed as an npm package, and there is no CLI tool for it as of time of writing.
 
 The compiler can be run as a JavaScript function, which takes the Yulp code as input and returns the Yul code.
 Therefore, to get the bytecode, the resulting Yul code must be compiled with the solc compiler:
@@ -1908,7 +1147,9 @@ SRC_PATH="/ERC20.yulp" OUT_PATH="/../../out/yulp/ir_ERC20.yul" node src/yulp/com
 
 It should also be mentioned that the Yulp compiler development is discontinued, as its repository has been archived since Febuary 2022.
 
-**Fe**. The Fe compiler can be installed using brew, downloaded directly from the GitHub releases page, or built from source. The compiler is compatible with MacOS and Linux, also it is possible to run it on Windows using WSL.
+##### 3.3.4.5 Compiling Fe
+
+The Fe compiler can be installed using brew, downloaded directly from the GitHub releases page, or built from source. The compiler is compatible with MacOS and Linux, also it is possible to run it on Windows using WSL.
 
 Fe compiler also includes optimizer options:
 
@@ -2051,8 +1292,6 @@ This section presents a comparative analysis of popular programming languages fo
 
 The goal of this comparison is to provide developers with a clear understanding of the strengths and weaknesses of each language, enabling informed decisions for smart contract development.
 
-Here’s the revised table based on your provided criteria:
-
 | **Criteria**                        | **Solidity**                                      | **Vyper**                                       | **Fe**                                      | **Yul**                                           | **Yulp**                                      |
 | ----------------------------------- | ------------------------------------------------- | ----------------------------------------------- | ------------------------------------------- | ------------------------------------------------- | --------------------------------------------- |
 | **Type Checking**                   | Statically Typed                                  | Statically Typed                                | Statically Typed                            | None (assembly-like)                              | None (assembly-like)                          |
@@ -2070,229 +1309,19 @@ Here’s the revised table based on your provided criteria:
 
 ##### 3.4.2.1. Keywords comparison
 
-Based on the **Solidity** 0.8.28 documentation, the list of keywords includes:
-
-Data Type Keywords
-
-- uint, uint8, uint16, ..., uint256
-- int, int8, int16, ..., int256
-- bool
-- address
-- bytes, bytes1, ..., bytes32
-- string
-- mapping
-- struct
-- enum
-- true, false
-
-Sub-denomination Keywords
-
-- wei, gwei, ether
-- seconds, minutes, hours, days, weeks, years
-
-Function and Variable Modifiers
-
-- function, constructor, fallback, receive
-- public, private, internal, external
-- view, pure, payable
-- constant, immutable, storage, memory, calldata, transient
-- override, virtual
-- returns, return
-- new, delete
-- modifier
-- \_
-
-Control Flow
-
-- if, else
-- for, while, do, break, continue
-
-Error Handling
-
-- require, assert, revert, error
-- try, catch
-
-Built-In Functions
-
-- abi, keccak256, ecrecover
-- type, block, msg, tx, gasleft
-- self
-
-Other
-
-- pragma, import
-- contract, interface, library, abstract
-- is
-- event, emit, indexed, anonymous
-- unchecked, assembly
-- using, as
-
-Based on the **Vyper** 0.4.0 documentation, here is a comprehensive list of keywords categorized by their functionalities:
-
-Data Type Keywords
-
-- int128, int256
-- uint8, uint16, uint32, uint64, uint128, uint256
-- bool
-- address
-- bytes, bytes32
-- string
-- fixed, ufixed
-- struct
-- mapping
-- array
-
-Function and Variable Modifiers
-
-- external, internal
-- view, pure, payable
-- nonreentrant
-- storage, memory, calldata
-- immutable, constant
-- constructor, fallback, receive
-
-Control Flow
-
-- if, elif, else
-- for, while
-- break, continue
-- pass
-
-Error Handling
-
-- assert, raise
-
-Other
-
-- contract, implements, interface
-- event, log
-- import, from, as
-
-Global Variables and Constants
-
-- msg, block, tx
-- wei, gwei, ether
-- true, false
-- self
-
-Based on the **Fe** 0.26.0 documentation, the keywords are categorized as follows:
-
-Data Types:
-
-- u8, u16, u32, u64, u128, u256
-- i8, i16, i32, i64, i128, i256
-- address
-- bool
-- bytes
-- enum
-- map
-- string
-- struct
-
-Function Definitions and Modifiers:
-
-- fn
-- pub
-- nonpayable
-- payable
-
-Control Structures:
-
-- if, else, elif
-- for, while
-- break, continue
-- match
-- return
-- revert
-
-Error Handling:
-
-- assert
-
-Contract Structure:
-
-- contract
-- event
-- use
-
-Variable Declarations:
-
-- let
-- mut
-- const
-
-Based on the **Yul** documentation, the keywords include:
-
-Code Structure:
-
-- object
-- code
-
-Variable Declarations:
-
-- let
-
-Function Definitions:
-
-- function
-
-Control Flow:
-
-- if
-- switch, case, default
-- for, break, continue
-- leave
-
-Memory Management:
-
-- mload, mstore, mstore8
-- sload, sstore
-- msize
-- calldataload, calldatasize, calldatacopy
-- codesize, codecopy
-- extcodesize, extcodecopy
-- returndatasize, returndatacopy
-
-Contract Execution:
-
-- stop, return, revert
-- selfdestruct
-- call, callcode, delegatecall, staticcall
-- create, create2
-- log0, log1, log2, log3, log4
-
-Built-in Functions:
-
-- keccak256, sha3, sha256, ripemd160, identity
-- gas, address, balance, caller, callvalue
-- blockhash, coinbase, timestamp, number, difficulty, gaslimit, chainid, selfbalance, basefee
-
-Based on the **Yulp** GitHub repository, this language includes all keywords from Yul, with additional features:
-
-Structures:
-
-- mstruct, enum
-
-Types:
-
-- const
-- mslice
-- true, false
-- MAX_UINT
-
-Memory Management:
-
-- mstore(x1, ... , xn)
-
-File-level Directives:
-
-- import
-- is
-
-Built-in Functions:
-
-- sig"..."
-- error"..."
+Here’s a compiled table comparing the keywords of Solidity, Vyper, Fe, Yul, and Yul+ across different categories:
+
+| **Category**              | **Solidity**                                                                                                                   | **Vyper**                                                                                    | **Fe**                                                                        | **Yul**                                                                | **Yul+**                                  |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- | ---------------------------------------------------------------------- | ----------------------------------------- |
+| **Data Type Keywords**    | `uint`, `int`, `bool`, `address`, `bytes`, `string`, `mapping`, `struct`, `enum`, `true`, `false`                              | `int128`, `uint256`, `bool`, `address`, `bytes`, `string`, `struct`, `mapping`, `array`      | `u256`, `i256`, `bool`, `address`, `bytes`, `string`, `map`, `struct`, `enum` | -                                                                      | `const`, `mstruct`, `enum`, `mslice`      |
+| **Sub-denomination**      | `wei`, `gwei`, `ether`, `seconds`, `minutes`, `hours`, `days`, `weeks`, `years`                                                | `wei`, `gwei`, `ether`                                                                       | -                                                                             | -                                                                      | -                                         |
+| **Function & Modifiers**  | `function`, `constructor`, `fallback`, `receive`, `public`, `private`, `internal`, `external`, `view`, `pure`, `payable`, etc. | `external`, `internal`, `view`, `pure`, `payable`, `nonreentrant`, `constructor`, `fallback` | `fn`, `pub`, `nonpayable`, `payable`                                          | `function`                                                             | Inherits from Yul with no added modifiers |
+| **Control Flow**          | `if`, `else`, `for`, `while`, `do`, `break`, `continue`                                                                        | `if`, `elif`, `else`, `for`, `while`, `break`, `continue`, `pass`                            | `if`, `else`, `elif`, `for`, `while`, `break`, `continue`, `match`, `return`  | `if`, `for`, `switch`, `case`, `default`, `break`, `continue`, `leave` | Inherits Yul                              |
+| **Error Handling**        | `require`, `assert`, `revert`, `try`, `catch`, `error`                                                                         | `assert`, `raise`                                                                            | `assert`, `revert`                                                            | `revert`                                                               | Adds `error"...`                          |
+| **Built-in Functions**    | `abi`, `keccak256`, `ecrecover`, `type`, `block`, `msg`, `tx`, `gasleft`, `self`                                               | `msg`, `block`, `tx`, `log`, `event`                                                         | -                                                                             | `keccak256`, `sha3`, `sha256`, `ripemd160`, `identity`, etc.           | Adds `sig"..."`                           |
+| **Contract Structure**    | `contract`, `interface`, `library`, `abstract`, `event`, `emit`, `is`, `assembly`, `unchecked`                                 | `contract`, `implements`, `interface`, `event`, `log`, `self`                                | `contract`, `event`, `use`                                                    | `object`, `code`                                                       | Inherits Yul                              |
+| **Memory Management**     | `storage`, `memory`, `calldata`, `immutable`, `transient`                                                                      | `storage`, `memory`, `calldata`, `immutable`, `constant`                                     | `let`, `mut`, `const`                                                         | `mstore`, `mload`, `sstore`, `sload`, `calldataload`, `msize`, etc.    | Adds `mstore(x1, ... , xn)`               |
+| **File-level Directives** | `pragma`, `import`                                                                                                             | `import`, `from`, `as`                                                                       | -                                                                             | -                                                                      | Adds `import`, `is`                       |
 
 ##### 3.4.2.2. Gas consumption comparison
 
