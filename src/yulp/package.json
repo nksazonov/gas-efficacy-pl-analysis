@@ -1,0 +1,18 @@
+{
+  "name": "yulp-compile",
+  "version": "1.0.0",
+  "main": "compile.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "type": "module",
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "yulp": "^0.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.4"
+  }
+}
